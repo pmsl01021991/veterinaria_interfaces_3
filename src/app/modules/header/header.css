@@ -1,0 +1,17 @@
+.btn-success {
+    background-color: #22c55e;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #16a34a;
+}
+
+.toast-center {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1080;
+    min-width: 320px;
+}
