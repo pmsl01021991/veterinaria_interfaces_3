@@ -77,7 +77,7 @@ ng version
 
 ### 2️⃣ Clonar el repositorio (si está en GitHub)
 ```bash
-git clone https://github.com/pmsl01021991/veterinaria_interfaces_3.git
+git clone https://github.com/pmsl01021991/veterinaria_interfaces_3
 cd mi-proyecto01-integrado-huellitas
 ```
 
