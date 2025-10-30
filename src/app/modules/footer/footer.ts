@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { NgFor } from '@angular/common'; // <-- necesario para *ngFor
+import { NgFor } from '@angular/common'; 
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [NgFor],                // <-- agrega esto
+  imports: [NgFor],                
   templateUrl: './footer.html',
   styleUrls: ['./footer.css']
 })
