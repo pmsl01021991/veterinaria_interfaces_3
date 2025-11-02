@@ -1,12 +1,10 @@
-import { Component, OnInit, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Authentication } from '../authentication/authentication';
-import { Calendario } from '../../calendario/calendario';
-import * as bootstrap from 'bootstrap';
 
-
+declare var bootstrap: any;
 
 type UserStored = {
   name?: string;
@@ -19,22 +17,59 @@ type UserStored = {
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, Authentication, Calendario],
+  imports: [CommonModule, FormsModule, Authentication],
   templateUrl: './header.html',
-  styleUrls: ['./header.css'],
-  changeDetection: ChangeDetectionStrategy.Default,
+  styleUrl: './header.css'
 })
-
 export class Header implements OnInit, AfterViewInit {
   mostrarAuth = false;
   mostrarCalendario = false;
   mostrarSubmenu = false;
   user: { name: string; rol: 'admin' | 'cliente' } | null = null;
 
+
+  private collapseRef: any | null = null;
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.cargarUsuario();
+      this.cargarUsuario();
+      this.autoCloseOnLinkClick();
+
+      // Cerrar el menú cuando cambias de ruta
+      this.router.events.subscribe((e) => {
+        if (e instanceof NavigationEnd) this.hideNavbar();
+      });
+    }
+
+    ngAfterViewInit(): void {
+      const navEl = document.getElementById('navbarNav');
+      if (navEl) {
+        // Creamos/obtenemos la instancia pero SIN abrir automáticamente
+        this.collapseRef = bootstrap.Collapse.getOrCreateInstance(navEl, { toggle: false });
+      }
+    }
+
+    toggleNavbar(): void {
+      // Asegura que siempre haya instancia válida
+      const navEl = document.getElementById('navbarNav');
+      if (!this.collapseRef && navEl) {
+        this.collapseRef = bootstrap.Collapse.getOrCreateInstance(navEl, { toggle: false });
+      }
+      this.collapseRef?.toggle();
+    }
+
+  private hideNavbar(): void {
+    const navEl = document.getElementById('navbarNav');
+    if (!navEl) return;
+    const instance = bootstrap.Collapse.getOrCreateInstance(navEl, { toggle: false });
+    instance.hide();
+  }
+
+  private autoCloseOnLinkClick(): void {
+    // Cierra al hacer clic en cualquier link del menú (comportamiento móvil)
+    document.querySelectorAll('.navbar-nav .nav-link').forEach((link) => {
+      link.addEventListener('click', () => this.hideNavbar());
+    });
   }
 
   private cargarUsuario(): void {
@@ -65,50 +100,42 @@ export class Header implements OnInit, AfterViewInit {
     this.mostrarAuth = false;
   }
 
-  abrirCalendario(event?: Event) {
-    if (event) event.preventDefault();
-    const usuarioRegistrado = localStorage.getItem('user');
-    if (!usuarioRegistrado) {
-      alert('Debes iniciar sesión o registrarte antes de separar una cita.');
-      this.mostrarAuth = true;
-      return;
-    }
+abrirCalendario(event?: Event) {
+  if (event) event.preventDefault();
+
+  const usuarioRegistrado = localStorage.getItem('user');
+
+  // Si NO hay usuario -> mostramos autenticación
+  if (!usuarioRegistrado) {
+    alert('Debes iniciar sesión o registrarte antes de separar una cita.');
+    this.mostrarAuth = true;
+    return;
   }
 
-  ngAfterViewInit(): void {
-    // Esperamos a que todo el DOM esté listo
-    setTimeout(() => {
-      const toggler = document.querySelector('.navbar-toggler') as HTMLElement | null;
-      const navbar = document.querySelector('#navbarNav') as HTMLElement | null;
+  // Si SÍ hay usuario -> navegamos al calendario
+  this.router.navigate(['/calendario']).then(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
 
-      if (!toggler || !navbar) return;
 
-      // Inicializamos el colapso de Bootstrap manualmente
-      let bsCollapse = bootstrap.Collapse.getInstance(navbar);
-      if (!bsCollapse) {
-        bsCollapse = new bootstrap.Collapse(navbar, { toggle: false });
+    onSubmit(form: any) {
+    if (form.valid) {
+      const modalEl = document.getElementById('registroModal');
+      if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.hide();
       }
 
-      // Control del botón hamburguesa
-      toggler.addEventListener('click', () => {
-        if (navbar.classList.contains('show')) {
-          bsCollapse!.hide();
-        } else {
-          bsCollapse!.show();
-        }
-      });
+      document.body.classList.remove('modal-open');
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.remove();
+      document.body.style.overflow = 'auto';
 
-      // Cerrar el menú al hacer clic en un enlace (en móviles)
-      const links = navbar.querySelectorAll('.nav-link');
-      links.forEach(link => {
-        link.addEventListener('click', () => {
-          const expanded = toggler.getAttribute('aria-expanded');
-          if (expanded === 'true') {
-            bsCollapse!.hide();
-          }
-        });
+      this.router.navigate(['/calendario']).then(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       });
-    }, 300);
+    }
   }
 
   esAdmin(): boolean {

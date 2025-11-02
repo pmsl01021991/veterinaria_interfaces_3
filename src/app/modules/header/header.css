@@ -37,12 +37,6 @@
   text-decoration: underline;
 }
 
-.navbar-collapse.show {
-  background-color: white;
-  transition: all 0.3s ease;
-}
-
-
 
 
 /* Tamaño base del logo */
