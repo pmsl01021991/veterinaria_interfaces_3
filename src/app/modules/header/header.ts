@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Authentication } from '../authentication/authentication';
 import { Calendario } from '../../calendario/calendario';
+import * as bootstrap from 'bootstrap';
 
-declare var bootstrap: any;
+
 
 type UserStored = {
   name?: string;
@@ -20,9 +21,11 @@ type UserStored = {
   standalone: true,
   imports: [CommonModule, FormsModule, Authentication, Calendario],
   templateUrl: './header.html',
-  styleUrl: './header.css'
+  styleUrls: ['./header.css'],
+  changeDetection: ChangeDetectionStrategy.Default,
 })
-export class Header implements OnInit {
+
+export class Header implements OnInit, AfterViewInit {
   mostrarAuth = false;
   mostrarCalendario = false;
   mostrarSubmenu = false;
@@ -70,6 +73,42 @@ export class Header implements OnInit {
       this.mostrarAuth = true;
       return;
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Esperamos a que todo el DOM esté listo
+    setTimeout(() => {
+      const toggler = document.querySelector('.navbar-toggler') as HTMLElement | null;
+      const navbar = document.querySelector('#navbarNav') as HTMLElement | null;
+
+      if (!toggler || !navbar) return;
+
+      // Inicializamos el colapso de Bootstrap manualmente
+      let bsCollapse = bootstrap.Collapse.getInstance(navbar);
+      if (!bsCollapse) {
+        bsCollapse = new bootstrap.Collapse(navbar, { toggle: false });
+      }
+
+      // Control del botón hamburguesa
+      toggler.addEventListener('click', () => {
+        if (navbar.classList.contains('show')) {
+          bsCollapse!.hide();
+        } else {
+          bsCollapse!.show();
+        }
+      });
+
+      // Cerrar el menú al hacer clic en un enlace (en móviles)
+      const links = navbar.querySelectorAll('.nav-link');
+      links.forEach(link => {
+        link.addEventListener('click', () => {
+          const expanded = toggler.getAttribute('aria-expanded');
+          if (expanded === 'true') {
+            bsCollapse!.hide();
+          }
+        });
+      });
+    }, 300);
   }
 
   esAdmin(): boolean {
