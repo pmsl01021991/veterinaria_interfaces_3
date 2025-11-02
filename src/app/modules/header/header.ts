@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,14 @@ import { Calendario } from '../../calendario/calendario';
 
 declare var bootstrap: any;
 
+type UserStored = {
+  name?: string;
+  rol?: 'admin' | 'cliente';
+  email?: string;
+  username?: string;
+  password?: string;
+};
+
 @Component({
   selector: 'app-header',
   standalone: true,
@@ -14,11 +22,36 @@ declare var bootstrap: any;
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
-export class Header {
+export class Header implements OnInit {
   mostrarAuth = false;
   mostrarCalendario = false;
+  mostrarSubmenu = false;
+  user: { name: string; rol: 'admin' | 'cliente' } | null = null;
 
   constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    this.cargarUsuario();
+  }
+
+  private cargarUsuario(): void {
+    const raw = localStorage.getItem('user');
+    if (!raw) return;
+    try {
+      const u: UserStored = JSON.parse(raw);
+      const name = u.name ?? u.username ?? (u.email ? u.email.split('@')[0] : '');
+      const rol = (u.rol as 'admin' | 'cliente') ?? (u.username === 'admin@gmail.com' ? 'admin' : 'cliente');
+      if (name) this.user = { name, rol };
+    } catch {
+      this.user = null;
+    }
+  }
+
+  logout(): void {
+    localStorage.removeItem('user');
+    this.user = null;
+    this.router.navigate(['/']).then(() => window.location.reload());
+  }
 
   abrirAuth() {
     this.mostrarAuth = true;
@@ -31,91 +64,39 @@ export class Header {
 
   abrirCalendario(event?: Event) {
     if (event) event.preventDefault();
-
     const usuarioRegistrado = localStorage.getItem('user');
     if (!usuarioRegistrado) {
       alert('Debes iniciar sesión o registrarte antes de separar una cita.');
       this.mostrarAuth = true;
       return;
     }
-
-    // Si el usuario está logueado, navega al calendario
-    this.router.navigate(['/calendario']);
   }
 
-
-
-
-
-  onSubmit(form: any) {
-    if (form.valid) {
-      const modalEl = document.getElementById('registroModal');
-      if (modalEl) {
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.hide();
-      }
-
-      document.body.classList.remove('modal-open');
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) backdrop.remove();
-      document.body.style.overflow = 'auto';
-
-      this.router.navigate(['/calendario']).then(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-    }
+  esAdmin(): boolean {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    return user?.rol === 'admin';
   }
 
-  onLogin(form: any) {
-    if (form.valid) {
-      const { email, password } = form.value;
-      console.log('Intentando iniciar sesión con:', email, password);
-
-      // Guarda usuario simulado
-      localStorage.setItem('user', JSON.stringify({ email }));
-
-      const modalEl = document.getElementById('loginModal');
-      if (modalEl) {
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.hide();
-      }
-
-      document.body.classList.remove('modal-open');
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) backdrop.remove();
-      document.body.style.overflow = 'auto';
-
-      alert('✅ Sesión iniciada correctamente.');
-    } else {
-      alert('Por favor completa todos los campos.');
-    }
+  irAlAdmin(event?: Event) {
+    if (event) event.preventDefault();
+    this.mostrarSubmenu = false;
+    this.router.navigate(['/admin']);
   }
 
   onRegister(form: any) {
-    if (form.valid) {
-      const { email, password, confirmPassword } = form.value;
+  if (form.valid) {
+    const { email, password, confirmPassword } = form.value;
 
-      if (password !== confirmPassword) {
-        alert('Las contraseñas no coinciden.');
-        return;
-      }
-
-      console.log('Usuario registrado:', email);
-
-      const modalEl = document.getElementById('registroModal');
-      if (modalEl) {
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.hide();
-      }
-
-      document.body.classList.remove('modal-open');
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) backdrop.remove();
-      document.body.style.overflow = 'auto';
-
-      alert('✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.');
-    } else {
-      alert('Por favor completa todos los campos.');
+    if (password !== confirmPassword) {
+      alert('Las contraseñas no coinciden.');
+      return;
     }
+
+    console.log('Usuario registrado:', email);
+    alert('✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.');
+  } else {
+    alert('Por favor completa todos los campos.');
   }
+}
+
 }

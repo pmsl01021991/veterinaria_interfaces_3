@@ -2,15 +2,21 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
   <div class="container">
 
-    <!-- Logo -->
-    <a class="navbar-brand" href="#inicio">
-      <img
-        src="assets/huellitas/Imagenes/LOGO2.png"
-        width="30%"
-        alt="Logo"
-        class="d-inline-block align-text-top"
-      />
-    </a>
+    <!-- IZQUIERDA: logo + saludo SIEMPRE visibles -->
+    <div class="brand-area d-flex align-items-center me-auto flex-nowrap">
+      <a class="navbar-brand d-flex align-items-center me-2" href="#inicio">
+        <img src="assets/huellitas/Imagenes/LOGO2.png" alt="Logo" class="brand-logo" />
+      </a>
+
+      <!-- Saludo (envuelto en ng-container para evitar error) -->
+      <ng-container *ngIf="user as u">
+        <div class="user-pill d-flex align-items-center">
+          <i class="bi bi-person-circle me-2"></i>
+          <span *ngIf="u.rol === 'admin'">Administrador</span>
+          <span *ngIf="u.rol !== 'admin'">Bienvenido, {{ u.name | titlecase }}</span>
+        </div>
+      </ng-container>
+    </div>
 
     <!-- Botón hamburguesa -->
     <button
@@ -34,8 +40,20 @@
         </li>
 
         <!-- Abre autenticación -->
-        <li class="nav-item">
-          <a class="nav-link" href="#" (click)="abrirAuth()">Registrar</a>
+        <li class="nav-item position-relative"
+            (mouseenter)="mostrarSubmenu = true"
+            (mouseleave)="mostrarSubmenu = false">
+          <a class="nav-link" href="#" (click)="abrirAuth()">Iniciar sesión</a>
+
+          <!-- Subenlace solo visible para admin -->
+          <div *ngIf="esAdmin() && mostrarSubmenu" class="admin-submenu">
+            <a class="nav-link admin-link" href="#" (click)="irAlAdmin($event)">Panel de Administración</a>
+          </div>
+        </li>
+
+        <!-- Botón de salida visible para todos los usuarios logueados -->
+        <li class="nav-item" *ngIf="user">
+          <a class="nav-link text-danger fw-bold" href="#" (click)="logout()">Salir</a>
         </li>
 
         <li class="nav-item">

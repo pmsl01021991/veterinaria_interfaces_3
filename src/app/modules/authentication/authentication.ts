@@ -54,9 +54,22 @@ export class Authentication {
       return;
     }
 
-    // Leer usuarios del localStorage
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    // ✅ Verificación especial para el administrador
+    if (this.username === 'admin@gmail.com' && this.password === 'pmsl123') {
+      const adminUser = {
+        username: this.username,
+        password: this.password,
+        rol: 'admin'
+      };
+      localStorage.setItem('user', JSON.stringify(adminUser));
+      alert('Inicio de sesión como administrador ✅');
+      this.cerrarAuth();
+      window.location.reload();
+      return;
+    }
 
+    // 🔍 Si no es admin, buscar entre los usuarios registrados
+    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
     const user = usuarios.find(
       (u: any) => u.username === this.username && u.password === this.password
     );
@@ -65,10 +78,11 @@ export class Authentication {
       const nombreLimpio = this.username.split('@')[0].replace(/\d+/g, '').replace(/\.+$/, '');
       const usuario = {
         name: nombreLimpio,
-        rol: this.username === 'admin@gmail.com' ? 'admin' : 'cliente'
+        rol: 'cliente',
+        username: this.username,
+        password: this.password
       };
       localStorage.setItem('user', JSON.stringify(usuario));
-
       alert('Inicio de sesión exitoso ✅');
       this.cerrarAuth();
       window.location.reload();
@@ -76,6 +90,7 @@ export class Authentication {
       this.error = 'Credenciales incorrectas.';
     }
   }
+
 
   // ✅ Registro con localStorage
   handleRegister(event: Event) {

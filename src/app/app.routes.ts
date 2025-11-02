@@ -6,6 +6,7 @@ import { MascotaComponent } from './mascota/mascota';
 import { MascotaRegistro } from './mascota/mascota-registro/mascota-registro';
 import { DuenoRegistro } from './dueno/dueno-registro/dueno-registro';
 import { Calendario } from './calendario/calendario';
+import { Admin } from './admin/admin';
 
 export const routes: Routes = [
   { path: '', component: Home },                         // Página principal
@@ -17,6 +18,9 @@ export const routes: Routes = [
   { path: 'duenos/registro', component: DuenoRegistro },
   { path: 'mascotas', component: MascotaComponent },
   { path: 'mascotas/registro', component: MascotaRegistro },
+
+  // 🔹 Nueva ruta para el panel del administrador
+  { path: 'admin', component: Admin },
 
   // Nueva ruta para el calendario de citas
   { path: 'calendario', component: Calendario },
