@@ -1,0 +1,32 @@
+.titulo-lista {
+  font-weight: bold;
+  color: #1a1a1a;
+}
+
+.mascota-card {
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mascota-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.icono-mascota {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.card-header {
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 1rem;
+}
+
+.card-body p {
+  margin: 0.3rem 0;
+  color: #333;
+}

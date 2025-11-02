@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-authentication',
@@ -17,7 +18,7 @@ export class Authentication {
   error = '';
   showRegister = false;
   termsAccepted = false;
-  mostrarAuth = true; 
+  mostrarAuth = true;
 
   // ✅ Validar email
   validarEmail(email: string): boolean {
@@ -35,26 +36,57 @@ export class Authentication {
     this.error = '';
   }
 
-  // ✅ Cerrar modal (se usa desde el botón ×)
+  // ✅ Cerrar modal
   cerrarAuth() {
     this.mostrarAuth = false;
   }
 
-  // ✅ Login con localStorage
+  // ✅ ✨ Aquí pegas la función personalizada del modal ✨
+  mostrarModal(titulo: string, mensaje: string, tipo: 'success' | 'error' | 'info' | 'warning') {
+    
+    this.mostrarAuth = false;
+    Swal.fire({
+      title: titulo,
+      html: `<div style="font-size: 16px; color: #333;">${mensaje}</div>`,
+      icon: tipo,
+      background: '#ffffff',
+      color: '#1a1a1a',
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#007BFF',
+      showClass: {
+        popup: 'animate__animated animate__fadeInDown'
+      },
+      hideClass: {
+        popup: 'animate__animated animate__fadeOutUp'
+      },
+      backdrop: `
+        rgba(0,0,0,0.5)
+        url("https://media.giphy.com/media/3o7aD4C6qE2ZbGslXy/giphy.gif")
+        center top
+        no-repeat
+      `,
+      customClass: {
+        title: 'swal2-title-custom',
+        popup: 'swal2-popup-custom',
+        confirmButton: 'swal2-confirm-custom'
+      }
+    });
+  }
+
+  // ✅ Login
   handleLogin(event: Event) {
     event.preventDefault();
 
     if (!this.validarEmail(this.username)) {
-      this.error = 'Correo inválido. Usa un formato válido (nombre@dominio.com)';
+      this.error = 'Correo inválido.';
       return;
     }
 
     if (!this.validarPassword(this.password)) {
-      this.error = 'Contraseña inválida. Debe tener mínimo 6 caracteres, incluyendo letras y números.';
+      this.error = 'Contraseña inválida.';
       return;
     }
 
-    // ✅ Verificación especial para el administrador
     if (this.username === 'admin@gmail.com' && this.password === 'pmsl123') {
       const adminUser = {
         username: this.username,
@@ -62,13 +94,12 @@ export class Authentication {
         rol: 'admin'
       };
       localStorage.setItem('user', JSON.stringify(adminUser));
-      alert('Inicio de sesión como administrador ✅');
+      this.mostrarModal('Bienvenido Administrador 👑', 'Inicio de sesión exitoso', 'success');
       this.cerrarAuth();
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1500);
       return;
     }
 
-    // 🔍 Si no es admin, buscar entre los usuarios registrados
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
     const user = usuarios.find(
       (u: any) => u.username === this.username && u.password === this.password
@@ -83,16 +114,15 @@ export class Authentication {
         password: this.password
       };
       localStorage.setItem('user', JSON.stringify(usuario));
-      alert('Inicio de sesión exitoso ✅');
+      this.mostrarModal('Inicio de sesión exitoso ✅', `¡Bienvenido ${nombreLimpio}!`, 'success');
       this.cerrarAuth();
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 1500);
     } else {
-      this.error = 'Credenciales incorrectas.';
+      this.mostrarModal('Error ❌', 'Credenciales incorrectas', 'error');
     }
   }
 
-
-  // ✅ Registro con localStorage
+  // ✅ Registro
   handleRegister(event: Event) {
     event.preventDefault();
 
@@ -102,7 +132,7 @@ export class Authentication {
     }
 
     if (!this.validarPassword(this.password1 || this.password2)) {
-      this.error = 'Contraseña inválida. Debe tener mínimo 6 caracteres, incluyendo letras y números.';
+      this.error = 'Contraseña inválida.';
       return;
     }
 
@@ -112,7 +142,6 @@ export class Authentication {
     }
 
     const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-
     if (usuarios.some((u: any) => u.username === this.username)) {
       this.error = 'Este correo ya está registrado.';
       return;
@@ -127,7 +156,7 @@ export class Authentication {
     usuarios.push(nuevoUsuario);
     localStorage.setItem('usuarios', JSON.stringify(usuarios));
 
-    alert('Usuario registrado correctamente ✅');
+    this.mostrarModal('Registro completado ✅', 'Tu cuenta ha sido creada correctamente', 'success');
     this.username = '';
     this.password1 = '';
     this.password2 = '';
@@ -135,7 +164,7 @@ export class Authentication {
     this.showRegister = false;
   }
 
-  // ✅ Checkbox de términos
+  // ✅ Checkbox
   handleCheckboxChange() {
     this.termsAccepted = !this.termsAccepted;
   }

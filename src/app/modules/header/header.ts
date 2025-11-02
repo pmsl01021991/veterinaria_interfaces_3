@@ -1,5 +1,5 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Authentication } from '../authentication/authentication';
@@ -17,7 +17,7 @@ type UserStored = {
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, FormsModule, Authentication],
+  imports: [CommonModule, FormsModule, Authentication, RouterLink],
   templateUrl: './header.html',
   styleUrl: './header.css'
 })

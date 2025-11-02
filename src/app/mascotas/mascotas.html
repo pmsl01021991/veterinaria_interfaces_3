@@ -1,0 +1,61 @@
+<div class="container py-4">
+  <h2 class="fw-bold mb-4 text-center">
+    🐾 Lista de Mascotas
+  </h2>
+
+  <!-- 🔍 Buscador -->
+  <div class="mb-4 text-center">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Buscar por nombre..."
+      class="form-control w-50 mx-auto shadow-sm"
+    />
+  </div>
+
+  <!-- Lista de mascotas -->
+  <div class="row justify-content-center g-4">
+    <div
+      class="col-md-4"
+      *ngFor="let mascota of mascotasFiltradas"
+    >
+      <div class="card shadow-sm border-0 rounded-4">
+        <div
+          class="card-header text-white d-flex align-items-center justify-content-between"
+          [ngClass]="{
+            'bg-primary': mascota.tipo === 'perro',
+            'bg-warning': mascota.tipo === 'gato'
+          }"
+        >
+          <div class="d-flex align-items-center">
+            <img
+              [src]="mascota.icono"
+              alt="icono"
+              width="32"
+              height="32"
+              class="me-2 rounded-circle"
+            />
+            <strong>{{ mascota.nombre }}</strong>
+          </div>
+          <span class="badge bg-light text-dark">{{ mascota.tipo | titlecase }}</span>
+        </div>
+
+        <div class="card-body">
+          <p><strong>Raza:</strong> {{ mascota.raza }}</p>
+          <p><strong>Edad:</strong> {{ mascota.edad }} años</p>
+          <p><strong>Color:</strong> {{ mascota.color }}</p>
+          <hr />
+          <p><strong>Dueño:</strong> {{ mascota.duenio }}</p>
+          <p><strong>Teléfono:</strong> {{ mascota.telefono }}</p>
+          <hr />
+          <p><strong>Notas:</strong> {{ mascota.notas }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Si no hay resultados -->
+  <div *ngIf="mascotasFiltradas.length === 0" class="text-center text-muted mt-4">
+    <i class="bi bi-search"></i> No se encontraron mascotas con ese nombre.
+  </div>
+</div>
