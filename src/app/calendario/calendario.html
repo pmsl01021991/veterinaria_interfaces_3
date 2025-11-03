@@ -50,8 +50,27 @@
       </div>
     </ng-container>
 
-    <!-- PASO 3: Nombre de la mascota -->
+    <!-- PASO 3: Tipo de mascota -->
     <ng-container *ngIf="paso === 3">
+      <h5 class="fw-bold mb-3">④ Selecciona el tipo de tu mascota</h5>
+
+      <select class="form-select" [(ngModel)]="tipoMascota">
+        <option [ngValue]="null" disabled selected>Selecciona tipo…</option>
+        <option value="perro">🐶 Perro</option>
+        <option value="gato">🐱 Gato</option>
+      </select>
+
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-link" (click)="paso = 2">Atrás</button>
+        <button class="btn btn-primary" [disabled]="!tipoMascota" (click)="continuarConTipo()">
+          Siguiente
+        </button>
+      </div>
+    </ng-container>
+
+
+    <!-- PASO 3: Nombre de la mascota -->
+    <ng-container *ngIf="paso === 4">
       <h5 class="mb-3">③ Ingresa el nombre de tu mascota</h5>
 
       <input
@@ -62,7 +81,7 @@
       />
 
       <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-link" (click)="paso = 2">Atrás</button>
+        <button class="btn btn-link" (click)="paso = 3">Atrás</button>
         <button
           class="btn btn-primary"
           [disabled]="!nombreMascota"
@@ -73,9 +92,51 @@
       </div>
     </ng-container>
 
-    <!-- PASO 4: Nombre del dueño -->
-    <ng-container *ngIf="paso === 4">
-      <h5 class="mb-3">④ Ingresa el nombre del dueño</h5>
+    <!-- PASO 4: Raza de la mascota -->
+    <ng-container *ngIf="paso === 5">
+      <h5 class="fw-bold mb-3">④ ¿Cuál es la raza de tu mascota?</h5>
+      <input
+        type="text"
+        class="form-control mb-3"
+        [(ngModel)]="razaMascota"
+        placeholder="Ejemplo: Labrador, Poodle, Bulldog..."
+      />
+
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-link" (click)="paso = 4">Atrás</button>
+        <button class="btn btn-primary" (click)="continuarConRaza()" [disabled]="!razaMascota">
+          Siguiente
+        </button>
+      </div>
+    </ng-container>
+
+        <ng-container *ngIf="paso === 6">
+      <h5 class="mb-3">③ Ingresa la edad de la Mascota</h5>
+
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Ej. 2 años"
+        [(ngModel)]="edadMascota"
+      />
+
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-link" (click)="paso = 5">Atrás</button>
+        <button
+          class="btn btn-primary"
+          [disabled]="!edadMascota"
+          (click)="continuarConEdad()"
+        >
+          Siguiente
+        </button>
+      </div>
+    </ng-container>
+ 
+
+
+    <!-- PASO 5: Nombre del dueño -->
+    <ng-container *ngIf="paso === 7">
+      <h5 class="mb-3">⑤ Ingresa el nombre del dueño</h5>
 
       <input
         type="text"
@@ -85,29 +146,51 @@
       />
 
       <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-link" (click)="paso = 3">Atrás</button>
+        <button class="btn btn-link" (click)="paso = 6">Atrás</button>
         <button
           class="btn btn-primary"
           [disabled]="!nombreDueno"
-          (click)="paso = 5"
+          (click)="continuarConDueno()"
         >
           Siguiente
         </button>
       </div>
     </ng-container>
 
-    <!-- PASO 5: Confirmación -->
-    <ng-container *ngIf="paso === 5">
-      <h5 class="mb-3">⑤ Confirmación</h5>
-
-      <p><strong>📅 Fecha:</strong> {{ fechaISO }}</p>
-      <p><strong>🩺 Servicio:</strong> {{ servicioSeleccionado?.nombre }}</p>
-      <p><strong>⏰ Hora:</strong> {{ horaSeleccionada }}</p>
-      <p><strong>🐾 Mascota:</strong> {{ nombreMascota }}</p>
-      <p><strong>👤 Dueño:</strong> {{ nombreDueno }}</p>
+    <!-- PASO 6: Teléfono -->
+    <ng-container *ngIf="paso === 8">
+      <h5 class="fw-bold mb-3">⑥ Ingresa tu número de teléfono</h5>
+      <input
+        type="tel"
+        class="form-control mb-3"
+        [(ngModel)]="telefonoDuenio"
+        placeholder="Ejemplo: 987654321"
+      />
 
       <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-link" (click)="paso = 4">Atrás</button>
+        <button class="btn btn-link" (click)="paso = 7">Atrás</button>
+        <button class="btn btn-primary" (click)="continuarConTelefono()" [disabled]="!telefonoDuenio">
+          Siguiente
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- PASO 7: Confirmación -->
+    <ng-container *ngIf="paso === 9">
+      <h5 class="mb-3">⑦ Confirmación</h5>
+
+      <p><strong>📅 Fecha:</strong> {{ fechaISO }}</p>
+      <p><strong>🩺 Servicio:</strong> {{ getNombreServicio(servicioSeleccionado) }}</p>
+      <p><strong>⏰ Hora:</strong> {{ horaSeleccionada }}</p>
+      <p><strong>TipoMascota:</strong> {{ tipoMascota }}</p>
+      <p><strong>🐾 Mascota:</strong> {{ nombreMascota }}</p>
+      <p><strong> Raza:</strong> {{ razaMascota }}</p>
+      <p><strong> EdadMascota:</strong> {{ edadMascota }}</p>
+      <p><strong>👤 Dueño:</strong> {{ nombreDueno }}</p>
+      <p><strong>📞 Teléfono:</strong> {{ telefonoDuenio }}</p>
+
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-link" (click)="paso = 8">Atrás</button>
         <button class="btn btn-success" (click)="confirmarReserva()">
           Confirmar cita
         </button>
@@ -115,4 +198,3 @@
     </ng-container>
   </div>
 </div>
- 

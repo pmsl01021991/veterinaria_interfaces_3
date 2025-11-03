@@ -12,30 +12,16 @@ import { FormsModule } from '@angular/forms';
 export class Mascotas {
   searchTerm: string = '';
 
-  mascotas = [
-    {
-      nombre: 'Pepelucho',
-      tipo: 'perro',
-      raza: 'Golden Retriever',
-      edad: 5,
-      color: 'Dorado',
-      duenio: 'Carlos Pérez',
-      telefono: '987654321',
-      notas: 'Muy activo y juguetón',
-      icono: 'assets/huellitas/Imagenes/perro.png'
-    },
-    {
-      nombre: 'Michi',
-      tipo: 'gato',
-      raza: 'Siames',
-      edad: 3,
-      color: 'Crema con café',
-      duenio: 'Ana Torres',
-      telefono: '912345678',
-      notas: 'Le gusta dormir al sol',
-      icono: 'assets/huellitas/Imagenes/gato.webp'
+  mascotas: any[] = [];
+
+
+  constructor() {
+    // 🐾 Cargar mascotas desde localStorage si existen
+    const guardadas = JSON.parse(localStorage.getItem('mascotas') || '[]');
+    if (guardadas.length > 0) {
+      this.mascotas = [...this.mascotas, ...guardadas];
     }
-  ];
+  }
 
   // Getter que filtra las mascotas según el texto ingresado
   get mascotasFiltradas() {
