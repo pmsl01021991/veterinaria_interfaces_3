@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import { usuarios, Usuario, guardarUsuarios } from '../../../backend';
 
 @Component({
   selector: 'app-authentication',
@@ -20,6 +19,8 @@ export class Authentication {
   showRegister = false;
   termsAccepted = false;
   mostrarAuth = true;
+
+  private apiUrl = 'https://backend-veterinaria1.onrender.com'; // 🔹 Tu backend en Render
 
   validarEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -48,7 +49,8 @@ export class Authentication {
     });
   }
 
-  handleLogin(event: Event) {
+  // ✅ LOGIN USANDO RENDER
+  async handleLogin(event: Event) {
     event.preventDefault();
 
     if (!this.validarEmail(this.username)) {
@@ -61,9 +63,9 @@ export class Authentication {
       return;
     }
 
-    // 🟣 ADMIN
+    // 🟣 ADMIN LOCAL
     if (this.username === 'admin@gmail.com' && this.password === 'pmsl123') {
-      const adminUser: Usuario = {
+      const adminUser = {
         username: this.username,
         password: this.password,
         rol: 'admin'
@@ -75,24 +77,34 @@ export class Authentication {
       return;
     }
 
-    // 🟢 CLIENTE
-    const user = usuarios.find(
-      (u) => u.username === this.username && u.password === this.password
-    );
+    try {
+      const res = await fetch(`${this.apiUrl}/usuarios`);
+      if (!res.ok) throw new Error('Error al conectar con el servidor');
 
-    if (user) {
-      const nombreLimpio = this.username.split('@')[0];
-      const usuarioLogueado = { ...user, name: nombreLimpio };
-      localStorage.setItem('user', JSON.stringify(usuarioLogueado));
-      this.mostrarModal('Inicio de sesión exitoso ✅', `¡Bienvenido ${nombreLimpio}!`, 'success');
-      this.cerrarAuth();
-      setTimeout(() => window.location.reload(), 1500);
-    } else {
-      this.mostrarModal('Error ❌', 'Credenciales incorrectas', 'error');
+      const usuarios = await res.json();
+
+      const user = usuarios.find(
+        (u: any) => u.username === this.username && u.password === this.password
+      );
+
+      if (user) {
+        const nombreLimpio = this.username.split('@')[0];
+        const usuarioLogueado = { ...user, name: nombreLimpio };
+        localStorage.setItem('user', JSON.stringify(usuarioLogueado));
+        this.mostrarModal('Inicio de sesión exitoso ✅', `¡Bienvenido ${nombreLimpio}!`, 'success');
+        this.cerrarAuth();
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        this.mostrarModal('Error ❌', 'Credenciales incorrectas', 'error');
+      }
+    } catch (error) {
+      console.error('❌ Error en login:', error);
+      this.mostrarModal('Error de conexión', 'No se pudo contactar con el servidor.', 'error');
     }
   }
 
-  handleRegister(event: Event) {
+  // ✅ REGISTRO USANDO RENDER
+  async handleRegister(event: Event) {
     event.preventDefault();
 
     if (!this.validarEmail(this.username)) {
@@ -110,26 +122,40 @@ export class Authentication {
       return;
     }
 
-    if (usuarios.some((u) => u.username === this.username)) {
-      this.error = 'Este correo ya está registrado.';
-      return;
+    try {
+      const res = await fetch(`${this.apiUrl}/usuarios`);
+      if (!res.ok) throw new Error('Error al conectar con el servidor');
+      const usuarios = await res.json();
+
+      if (usuarios.some((u: any) => u.username === this.username)) {
+        this.error = 'Este correo ya está registrado.';
+        return;
+      }
+
+      const nuevoUsuario = {
+        username: this.username,
+        password: this.password1,
+        rol: 'cliente'
+      };
+
+      const resPost = await fetch(`${this.apiUrl}/usuarios`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevoUsuario)
+      });
+
+      if (!resPost.ok) throw new Error('Error al registrar el usuario');
+
+      this.mostrarModal('Registro completado ✅', 'Tu cuenta ha sido creada correctamente', 'success');
+      this.username = '';
+      this.password1 = '';
+      this.password2 = '';
+      this.error = '';
+      this.showRegister = false;
+    } catch (error) {
+      console.error('❌ Error al registrar:', error);
+      this.mostrarModal('Error', 'No se pudo registrar el usuario.', 'error');
     }
-
-    const nuevoUsuario: Usuario = {
-      username: this.username,
-      password: this.password1,
-      rol: 'cliente'
-    };
-
-    usuarios.push(nuevoUsuario);
-    guardarUsuarios(); // ✅ se guarda en backend.ts (usa localStorage internamente)
-
-    this.mostrarModal('Registro completado ✅', 'Tu cuenta ha sido creada correctamente', 'success');
-    this.username = '';
-    this.password1 = '';
-    this.password2 = '';
-    this.error = '';
-    this.showRegister = false;
   }
 
   handleCheckboxChange() {

@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { citas, Cita, guardarCitas } from '../../backend';
 
 @Component({
   selector: 'app-admin',
@@ -9,15 +8,41 @@ import { citas, Cita, guardarCitas } from '../../backend';
   templateUrl: './admin.html',
   styleUrls: ['./admin.css']
 })
-export class Admin {
-  // 🔹 Usamos directamente las citas del backend.ts
-  citas: Cita[] = citas;
+export class Admin implements OnInit {
+  citas: any[] = [];
 
-  // ✅ Eliminar una cita
-  eliminarCita(index: number) {
-    if (confirm('¿Seguro que deseas eliminar esta cita?')) {
+  ngOnInit() {
+    this.cargarCitas();
+  }
+
+  // 🔹 Obtener citas desde Render
+  async cargarCitas() {
+    try {
+      const res = await fetch('https://backend-veterinaria1.onrender.com/citas');
+      if (!res.ok) throw new Error('Error al obtener citas');
+      this.citas = await res.json();
+    } catch (err) {
+      console.error('❌ Error al cargar citas:', err);
+      alert('No se pudieron cargar las citas.');
+    }
+  }
+
+  // ✅ Eliminar cita tanto local como en Render
+  async eliminarCita(index: number) {
+    const cita = this.citas[index];
+    if (!cita || !confirm('¿Seguro que deseas eliminar esta cita?')) return;
+
+    try {
+      const res = await fetch(`https://backend-veterinaria1.onrender.com/citas/${cita.id}`, {
+        method: 'DELETE'
+      });
+
+      if (!res.ok) throw new Error('Error al eliminar la cita');
       this.citas.splice(index, 1);
-      guardarCitas(); // 👈 Guarda los cambios en localStorage a través del backend.ts
+      alert('✅ Cita eliminada correctamente.');
+    } catch (err) {
+      console.error('❌ Error al eliminar cita:', err);
+      alert('No se pudo eliminar la cita.');
     }
   }
 }

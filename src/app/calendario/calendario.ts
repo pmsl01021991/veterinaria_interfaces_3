@@ -5,7 +5,6 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ReservasService, ServicioVeterinario } from '../services/reservas.service';
-import { mascotas, Mascota, guardarMascotas } from '../../backend';
 
 @Component({
   selector: 'app-calendario',
@@ -130,7 +129,7 @@ export class Calendario {
     return servicio ? servicio.nombre : '';
   }
 
-  confirmarReserva() {
+  async confirmarReserva() {
     if (
       !this.fechaISO ||
       !this.servicioSeleccionado ||
@@ -146,7 +145,7 @@ export class Calendario {
       return;
     }
 
-    const nuevaMascota: Mascota = {
+    const nuevaMascota = {
       id: Date.now(),
       tipo: this.tipoMascota,
       nombre: this.nombreMascota,
@@ -161,11 +160,38 @@ export class Calendario {
           : 'assets/huellitas/Imagenes/perro.png',
     };
 
-    // ✅ Guardar en backend (usa localStorage internamente)
-    mascotas.push(nuevaMascota);
-    guardarMascotas();
+    try {
+      // 🔹 Guardar mascota en Render
+      const resMascota = await fetch('https://backend-veterinaria1.onrender.com/mascotas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevaMascota),
+      });
+      if (!resMascota.ok) throw new Error('Error al guardar la mascota');
 
-    alert('✅ Tus datos han sido enviados correctamente.');
-    this.cerrarWizard();
+      // 🔹 Crear cita asociada en Render
+      const nuevaCita = {
+        id: Date.now(),
+        fecha: this.fechaISO,
+        hora: this.horaSeleccionada,
+        servicio: this.nombreServicioSeleccionado,
+        nombreMascota: this.nombreMascota,
+        duenio: this.nombreDueno,
+        telefono: this.telefonoDuenio,
+      };
+
+      const resCita = await fetch('https://backend-veterinaria1.onrender.com/citas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevaCita),
+      });
+      if (!resCita.ok) throw new Error('Error al guardar la cita');
+
+      alert('✅ Tus datos han sido enviados correctamente.');
+      this.cerrarWizard();
+    } catch (err) {
+      console.error('❌ Error al guardar datos en Render:', err);
+      alert('No se pudo guardar la reserva.');
+    }
   }
 }

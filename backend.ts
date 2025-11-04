@@ -1,4 +1,7 @@
-// backend.ts
+// ✅ URL base del backend en Render
+const BASE_URL = 'https://backend-veterinaria1.onrender.com/api';
+
+// --- INTERFACES ---
 export interface Usuario {
   id?: number;
   username: string;
@@ -23,51 +26,51 @@ export interface Cita {
   fecha: string;
   hora: string;
   servicio: string;
-  mascota: string;
-  duenio: string;
+  mascotaId: number;
 }
 
-// 🔹 URL de tu backend en Render
-const API_URL = 'https://backend-veterinaria1.onrender.com';
-
-// ---------------------- USUARIOS ----------------------
+// --- FUNCIONES FETCH ---
 export async function getUsuarios(): Promise<Usuario[]> {
-  const res = await fetch(`${API_URL}/usuarios`);
+  const res = await fetch(`${BASE_URL}/usuarios`);
   return res.json();
 }
 
-export async function addUsuario(usuario: Usuario): Promise<void> {
-  await fetch(`${API_URL}/usuarios`, {
+export async function crearUsuario(usuario: Usuario) {
+  await fetch(`${BASE_URL}/usuarios`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(usuario)
   });
 }
 
-// ---------------------- MASCOTAS ----------------------
 export async function getMascotas(): Promise<Mascota[]> {
-  const res = await fetch(`${API_URL}/mascotas`);
+  const res = await fetch(`${BASE_URL}/mascotas`);
   return res.json();
 }
 
-export async function addMascota(mascota: Mascota): Promise<void> {
-  await fetch(`${API_URL}/mascotas`, {
+export async function crearMascota(mascota: Mascota) {
+  await fetch(`${BASE_URL}/mascotas`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(mascota)
   });
 }
 
-// ---------------------- CITAS ----------------------
 export async function getCitas(): Promise<Cita[]> {
-  const res = await fetch(`${API_URL}/citas`);
+  const res = await fetch(`${BASE_URL}/citas`);
   return res.json();
 }
 
-export async function addCita(cita: Cita): Promise<void> {
-  await fetch(`${API_URL}/citas`, {
+export async function crearCita(cita: Cita) {
+  await fetch(`${BASE_URL}/citas`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(cita)
+  });
+}
+
+export async function eliminarCita(id: number) {
+  await fetch(`${BASE_URL}/citas/${id}`, {
+    method: 'DELETE'
   });
 }
