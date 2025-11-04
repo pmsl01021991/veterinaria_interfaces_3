@@ -129,7 +129,7 @@ export class Calendario {
     return servicio ? servicio.nombre : '';
   }
 
-  async confirmarReserva() {
+    async confirmarReserva() {
     if (
       !this.fechaISO ||
       !this.servicioSeleccionado ||
@@ -187,11 +187,18 @@ export class Calendario {
       });
       if (!resCita.ok) throw new Error('Error al guardar la cita');
 
-      alert('✅ Tus datos han sido enviados correctamente.');
-      this.cerrarWizard();
+      // ✅ Mostrar confirmación
+      alert('✅ Tu cita se ha registrado correctamente.');
+
+      // 🔹 Cerrar el modal y forzar actualización visual
+      this.zone.run(() => {
+        this.cerrarWizard();
+        this.cdr.detectChanges();
+      });
     } catch (err) {
       console.error('❌ Error al guardar datos en Render:', err);
       alert('No se pudo guardar la reserva.');
     }
   }
+
 }
