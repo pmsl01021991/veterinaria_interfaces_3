@@ -16,52 +16,29 @@ export class Mascotas implements OnInit {
   private apiUrl = 'https://backend-veterinaria-qedk.onrender.com/mascotas';
 
   async ngOnInit() {
-    await this.cargarMascotasConReintento();
-  }
-
-  // 🐾 Intentar hasta 3 veces para dar tiempo al backend de Render
-  async cargarMascotasConReintento() {
-    let intentos = 0;
-    while (intentos < 3) {
-      try {
-        await this.cargarMascotas();
-        return; // ✅ si carga, sal del bucle
-      } catch (error) {
-        intentos++;
-        console.warn(`Intento ${intentos} fallido, reintentando...`);
-        await this.esperar(2500); // espera 2.5 segundos
-      }
+    // 🔹 Primero intenta con lo que tengas guardado localmente
+    const guardadas = JSON.parse(localStorage.getItem('mascotas') || '[]');
+    if (guardadas.length > 0) {
+      this.mascotas = guardadas;
+      this.cargando = false;
     }
 
-    // ❌ Si falló todo, carga desde localStorage
-    const guardadas = JSON.parse(localStorage.getItem('mascotas') || '[]');
-    this.mascotas = guardadas;
-    this.cargando = false;
+    // 🔹 Luego intenta actualizar desde el backend (sin bloquear la vista)
+    this.actualizarDesdeBackend();
   }
 
-  // 🧩 Función que realmente llama al backend
-  async cargarMascotas() {
-    // Timeout manual (por si Render no responde)
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 8000); // 8s máximo
-
-    const res = await fetch(this.apiUrl, {
-      cache: 'no-store',
-      signal: controller.signal,
-    });
-
-    clearTimeout(id);
-
-    if (!res.ok) throw new Error('Error al cargar mascotas');
-
-    const data = await res.json();
-    localStorage.setItem('mascotas', JSON.stringify(data));
-    this.mascotas = data;
-    this.cargando = false;
-  }
-
-  private esperar(ms: number) {
-    return new Promise(res => setTimeout(res, ms));
+  private async actualizarDesdeBackend() {
+    try {
+      const res = await fetch(this.apiUrl, { cache: 'no-store' });
+      if (!res.ok) throw new Error('Error al cargar mascotas');
+      const data = await res.json();
+      localStorage.setItem('mascotas', JSON.stringify(data));
+      this.mascotas = data;
+    } catch (error) {
+      console.warn('⚠️ Backend no disponible todavía, usando localStorage');
+    } finally {
+      this.cargando = false;
+    }
   }
 
   // 🔍 Filtro
