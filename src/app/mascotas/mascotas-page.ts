@@ -12,33 +12,37 @@ import { FormsModule } from '@angular/forms';
 export class Mascotas implements OnInit {
   searchTerm: string = '';
   mascotas: any[] = [];
+  cargando: boolean = true; // 👈 Nuevo: indicador de carga
 
-  private apiUrl = 'https://backend-veterinaria-qedk.onrender.com/mascotas'; // 🔹 URL de Render
+  private apiUrl = 'https://backend-veterinaria-qedk.onrender.com/mascotas';
 
   async ngOnInit() {
+    // Espera un momento para darle tiempo al backend de despertar
+    await new Promise(res => setTimeout(res, 800));
     await this.cargarMascotas();
   }
 
-  // 🐾 Cargar mascotas desde Render (backend)
   async cargarMascotas() {
     try {
-      const res = await fetch(this.apiUrl);
+      const res = await fetch(this.apiUrl, { cache: 'no-store' }); // 👈 Evita usar caché vieja
       if (!res.ok) throw new Error('Error al cargar mascotas');
       const data = await res.json();
 
-      // Guardamos también en localStorage para persistencia local
+      // Guarda localmente (por si Render se cae)
       localStorage.setItem('mascotas', JSON.stringify(data));
       this.mascotas = data;
     } catch (error) {
       console.error('❌ Error cargando mascotas desde Render:', error);
 
-      // Si falla Render, usa las guardadas localmente
+      // Si falla Render, usa lo guardado en localStorage
       const guardadas = JSON.parse(localStorage.getItem('mascotas') || '[]');
       this.mascotas = guardadas;
+    } finally {
+      this.cargando = false; // 👈 Oculta el spinner
     }
   }
 
-  // 🔍 Getter que filtra las mascotas según el texto ingresado de la pagina
+  // 🔍 Filtrado de mascotas
   get mascotasFiltradas() {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.mascotas;
