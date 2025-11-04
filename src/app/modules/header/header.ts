@@ -32,14 +32,20 @@ export class Header implements OnInit, AfterViewInit {
   constructor(private router: Router) {}
 
   ngOnInit(): void {
-      this.cargarUsuario();
-      this.autoCloseOnLinkClick();
+    this.cargarUsuario();
+    this.autoCloseOnLinkClick();
 
-      // Cerrar el menú cuando cambias de ruta
-      this.router.events.subscribe((e) => {
-        if (e instanceof NavigationEnd) this.hideNavbar();
-      });
-    }
+    // Cerrar el menú cuando cambias de ruta
+    this.router.events.subscribe((e) => {
+      if (e instanceof NavigationEnd) this.hideNavbar();
+    });
+
+    // 🔹 Detectar cambios en localStorage (por login o logout)
+    window.addEventListener('storage', () => {
+      this.cargarUsuario();
+    });
+  }
+
 
     ngAfterViewInit(): void {
       const navEl = document.getElementById('navbarNav');
@@ -74,7 +80,10 @@ export class Header implements OnInit, AfterViewInit {
 
   private cargarUsuario(): void {
     const raw = localStorage.getItem('user');
-    if (!raw) return;
+    if (!raw) {
+      this.user = null;
+      return;
+    }
     try {
       const u: UserStored = JSON.parse(raw);
       const name = u.name ?? u.username ?? (u.email ? u.email.split('@')[0] : '');
@@ -84,6 +93,7 @@ export class Header implements OnInit, AfterViewInit {
       this.user = null;
     }
   }
+
 
   logout(): void {
     localStorage.removeItem('user');

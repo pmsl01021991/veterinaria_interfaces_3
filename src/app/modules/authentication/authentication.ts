@@ -73,8 +73,10 @@ export class Authentication {
       localStorage.setItem('user', JSON.stringify(adminUser));
       this.mostrarModal('Bienvenido Administrador 👑', 'Inicio de sesión exitoso', 'success');
       this.cerrarAuth();
-      setTimeout(() => window.location.reload(), 1500);
-      return;
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage')); // actualiza el header sin recargar
+      }, 800);
+
     }
 
     try {

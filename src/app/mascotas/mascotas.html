@@ -12,21 +12,18 @@
       class="form-control w-50 mx-auto shadow-sm"
     />
   </div>
-  
-  <!-- Spinner mientras carga -->
-  <div *ngIf="cargando" class="text-center mt-5">
-    <div class="spinner-border text-primary" role="status"></div>
-    <p class="mt-2 text-muted">Cargando mascotas...</p>
+
+  <!-- 🔹 Estado de carga invisible -->
+  <div *ngIf="cargando" style="display: none;"></div>
+
+
+  <!-- 🔹 Si no hay mascotas -->
+  <div *ngIf="!cargando && mascotasFiltradas.length === 0" class="text-center text-muted mt-4">
+    🐾 No hay mascotas registradas aún.
   </div>
 
-  <!-- Contenido principal -->
-  <div *ngIf="!cargando">
-    <!-- (todo tu código actual de tarjetas va aquí) -->
-  </div>
-
-
-  <!-- Lista de mascotas -->
-  <div class="row justify-content-center g-4">
+  <!-- 🔹 Lista de mascotas -->
+  <div *ngIf="!cargando && mascotasFiltradas.length > 0" class="row justify-content-center g-4">
     <div
       class="col-md-4"
       *ngFor="let mascota of mascotasFiltradas"
@@ -41,7 +38,7 @@
         >
           <div class="d-flex align-items-center">
             <img
-              [src]="mascota.icono"
+              [src]="mascota.icono || 'assets/img/pata.png'"
               alt="icono"
               width="32"
               height="32"
@@ -63,10 +60,5 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Si no hay resultados -->
-  <div *ngIf="mascotasFiltradas.length === 0" class="text-center text-muted mt-4">
-    <i class="bi bi-search"></i> No se encontraron mascotas con ese nombre.
   </div>
 </div>
