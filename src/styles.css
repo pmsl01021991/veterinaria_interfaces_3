@@ -280,3 +280,8 @@ iframe {
 .card-text { min-height: 7rem;
 
 }
+
+/* ===== Ajuste global por navbar fijo ===== */
+body {
+  padding-top: 80px !important; /* Altura del header */
+}
