@@ -20,7 +20,7 @@ export class Authentication {
   termsAccepted = false;
   mostrarAuth = true;
 
-  private apiUrl = 'https://backend-veterinaria1.onrender.com'; // 🔹 Tu backend en Render
+  private apiUrl = 'https://backend-veterinaria-qedk.onrender.com'; // 🔹 Tu backend en Render
 
   validarEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
