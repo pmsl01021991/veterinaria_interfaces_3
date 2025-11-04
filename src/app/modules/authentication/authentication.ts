@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+import { usuarios, Usuario, guardarUsuarios } from '../../../backend';
 
 @Component({
   selector: 'app-authentication',
@@ -20,60 +21,33 @@ export class Authentication {
   termsAccepted = false;
   mostrarAuth = true;
 
-  // ✅ Validar email
   validarEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
-  // ✅ Validar contraseña
   validarPassword(pass: string): boolean {
     return /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6,}$/.test(pass);
   }
 
-  // ✅ Alternar login ↔ registro
   handleShowRegister() {
     this.showRegister = !this.showRegister;
     this.error = '';
   }
 
-  // ✅ Cerrar modal
   cerrarAuth() {
     this.mostrarAuth = false;
   }
 
-  // ✅ ✨ Aquí pegas la función personalizada del modal ✨
   mostrarModal(titulo: string, mensaje: string, tipo: 'success' | 'error' | 'info' | 'warning') {
-    
-    this.mostrarAuth = false;
     Swal.fire({
       title: titulo,
-      html: `<div style="font-size: 16px; color: #333;">${mensaje}</div>`,
+      html: `<div style="font-size: 16px;">${mensaje}</div>`,
       icon: tipo,
-      background: '#ffffff',
-      color: '#1a1a1a',
       confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#007BFF',
-      showClass: {
-        popup: 'animate__animated animate__fadeInDown'
-      },
-      hideClass: {
-        popup: 'animate__animated animate__fadeOutUp'
-      },
-      backdrop: `
-        rgba(0,0,0,0.5)
-        url("https://media.giphy.com/media/3o7aD4C6qE2ZbGslXy/giphy.gif")
-        center top
-        no-repeat
-      `,
-      customClass: {
-        title: 'swal2-title-custom',
-        popup: 'swal2-popup-custom',
-        confirmButton: 'swal2-confirm-custom'
-      }
+      confirmButtonColor: '#007BFF'
     });
   }
 
-  // ✅ Login
   handleLogin(event: Event) {
     event.preventDefault();
 
@@ -87,8 +61,9 @@ export class Authentication {
       return;
     }
 
+    // 🟣 ADMIN
     if (this.username === 'admin@gmail.com' && this.password === 'pmsl123') {
-      const adminUser = {
+      const adminUser: Usuario = {
         username: this.username,
         password: this.password,
         rol: 'admin'
@@ -100,20 +75,15 @@ export class Authentication {
       return;
     }
 
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
+    // 🟢 CLIENTE
     const user = usuarios.find(
-      (u: any) => u.username === this.username && u.password === this.password
+      (u) => u.username === this.username && u.password === this.password
     );
 
     if (user) {
-      const nombreLimpio = this.username.split('@')[0].replace(/\d+/g, '').replace(/\.+$/, '');
-      const usuario = {
-        name: nombreLimpio,
-        rol: 'cliente',
-        username: this.username,
-        password: this.password
-      };
-      localStorage.setItem('user', JSON.stringify(usuario));
+      const nombreLimpio = this.username.split('@')[0];
+      const usuarioLogueado = { ...user, name: nombreLimpio };
+      localStorage.setItem('user', JSON.stringify(usuarioLogueado));
       this.mostrarModal('Inicio de sesión exitoso ✅', `¡Bienvenido ${nombreLimpio}!`, 'success');
       this.cerrarAuth();
       setTimeout(() => window.location.reload(), 1500);
@@ -122,7 +92,6 @@ export class Authentication {
     }
   }
 
-  // ✅ Registro
   handleRegister(event: Event) {
     event.preventDefault();
 
@@ -131,7 +100,7 @@ export class Authentication {
       return;
     }
 
-    if (!this.validarPassword(this.password1 || this.password2)) {
+    if (!this.validarPassword(this.password1)) {
       this.error = 'Contraseña inválida.';
       return;
     }
@@ -141,20 +110,19 @@ export class Authentication {
       return;
     }
 
-    const usuarios = JSON.parse(localStorage.getItem('usuarios') || '[]');
-    if (usuarios.some((u: any) => u.username === this.username)) {
+    if (usuarios.some((u) => u.username === this.username)) {
       this.error = 'Este correo ya está registrado.';
       return;
     }
 
-    const nuevoUsuario = {
+    const nuevoUsuario: Usuario = {
       username: this.username,
       password: this.password1,
       rol: 'cliente'
     };
 
     usuarios.push(nuevoUsuario);
-    localStorage.setItem('usuarios', JSON.stringify(usuarios));
+    guardarUsuarios(); // ✅ se guarda en backend.ts (usa localStorage internamente)
 
     this.mostrarModal('Registro completado ✅', 'Tu cuenta ha sido creada correctamente', 'success');
     this.username = '';
@@ -164,7 +132,6 @@ export class Authentication {
     this.showRegister = false;
   }
 
-  // ✅ Checkbox
   handleCheckboxChange() {
     this.termsAccepted = !this.termsAccepted;
   }

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { citas, Cita, guardarCitas } from '../../backend';
 
 @Component({
   selector: 'app-admin',
@@ -9,10 +10,14 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./admin.css']
 })
 export class Admin {
-  citas = JSON.parse(localStorage.getItem('citas') || '[]');
+  // 🔹 Usamos directamente las citas del backend.ts
+  citas: Cita[] = citas;
 
-  eliminarCita(i: number) {
-    this.citas.splice(i, 1);
-    localStorage.setItem('citas', JSON.stringify(this.citas));
+  // ✅ Eliminar una cita
+  eliminarCita(index: number) {
+    if (confirm('¿Seguro que deseas eliminar esta cita?')) {
+      this.citas.splice(index, 1);
+      guardarCitas(); // 👈 Guarda los cambios en localStorage a través del backend.ts
+    }
   }
 }

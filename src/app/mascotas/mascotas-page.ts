@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { mascotas } from '../../backend';
 
 @Component({
   selector: 'app-mascotas',
@@ -12,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 export class Mascotas {
   searchTerm: string = '';
 
-  mascotas: any[] = [];
+  mascotas = mascotas;
 
 
   constructor() {

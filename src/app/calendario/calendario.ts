@@ -5,6 +5,7 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ReservasService, ServicioVeterinario } from '../services/reservas.service';
+import { mascotas, Mascota, guardarMascotas } from '../../backend';
 
 @Component({
   selector: 'app-calendario',
@@ -18,7 +19,6 @@ export class Calendario {
   paso = 1;
 
   fechaISO: string | null = null;
-
   servicios: ServicioVeterinario[] = [];
   servicioSeleccionado: ServicioVeterinario | null = null;
 
@@ -32,7 +32,6 @@ export class Calendario {
   telefonoDuenio: string = '';
 
   nombreServicioSeleccionado: string = '';
-
 
   calendarOptions: any = {
     plugins: [dayGridPlugin, interactionPlugin],
@@ -82,17 +81,12 @@ export class Calendario {
   async continuarConServicio() {
     if (!this.servicioSeleccionado || !this.fechaISO) return;
 
-  this.horas = await this.reservasSrv.getHorasDisponibles(
-    this.fechaISO!,
-    this.servicioSeleccionado?.id ?? 0  // 👈 ESTE DETALLE ES IMPORTANTE
-  );
+    this.horas = await this.reservasSrv.getHorasDisponibles(
+      this.fechaISO!,
+      this.servicioSeleccionado?.id ?? 0
+    );
 
-
-
-    // Guarda el nombre del servicio seleccionado
-
-  this.nombreServicioSeleccionado = this.servicioSeleccionado.nombre;
-
+    this.nombreServicioSeleccionado = this.servicioSeleccionado.nombre;
     this.horaSeleccionada = null;
     this.paso = 2;
   }
@@ -104,7 +98,7 @@ export class Calendario {
 
   continuarConTipo() {
     if (!this.tipoMascota) return;
-    this.paso = 4; // luego sigue al paso de raza
+    this.paso = 4;
   }
 
   continuarConMascota() {
@@ -136,14 +130,24 @@ export class Calendario {
     return servicio ? servicio.nombre : '';
   }
 
-
   confirmarReserva() {
-    if (!this.fechaISO || !this.servicioSeleccionado || !this.horaSeleccionada || !this.tipoMascota! || !this.nombreMascota || !this.razaMascota || !this.edadMascota || !this.nombreDueno || !this.telefonoDuenio) {
+    if (
+      !this.fechaISO ||
+      !this.servicioSeleccionado ||
+      !this.horaSeleccionada ||
+      !this.tipoMascota ||
+      !this.nombreMascota ||
+      !this.razaMascota ||
+      !this.edadMascota ||
+      !this.nombreDueno ||
+      !this.telefonoDuenio
+    ) {
       alert('Por favor completa todos los datos antes de confirmar.');
       return;
     }
 
-    const nuevaMascota = {
+    const nuevaMascota: Mascota = {
+      id: Date.now(),
       tipo: this.tipoMascota,
       nombre: this.nombreMascota,
       raza: this.razaMascota,
@@ -151,24 +155,17 @@ export class Calendario {
       duenio: this.nombreDueno,
       telefono: this.telefonoDuenio,
       notas: `Servicio: ${this.nombreServicioSeleccionado} - Fecha: ${this.fechaISO} a las ${this.horaSeleccionada}`,
-      icono: this.tipoMascota === 'gato'
-        ? 'assets/huellitas/Imagenes/gato.webp'
-        : 'assets/huellitas/Imagenes/perro.png'
+      icono:
+        this.tipoMascota.toLowerCase() === 'gato'
+          ? 'assets/huellitas/Imagenes/gato.webp'
+          : 'assets/huellitas/Imagenes/perro.png',
     };
 
-
-    // ✅ Obtener mascotas existentes del localStorage
-    const mascotasGuardadas = JSON.parse(localStorage.getItem('mascotas') || '[]');
-
-    // ✅ Agregar la nueva mascota
-    mascotasGuardadas.push(nuevaMascota);
-
-    // ✅ Guardar nuevamente en localStorage
-    localStorage.setItem('mascotas', JSON.stringify(mascotasGuardadas));
+    // ✅ Guardar en backend (usa localStorage internamente)
+    mascotas.push(nuevaMascota);
+    guardarMascotas();
 
     alert('✅ Tus datos han sido enviados correctamente.');
-
     this.cerrarWizard();
   }
 }
- 
