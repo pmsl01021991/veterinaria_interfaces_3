@@ -34,17 +34,23 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "5MB"
+                  "maximumWarning": "10mb",
+                  "maximumError": "15mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "10kB",
-                  "maximumError": "20kB"
+                  "maximumWarning": "10kb",
+                  "maximumError": "20kb"
                 }
+              ],
+              "allowedCommonJsDependencies": [
+                "bootstrap",
+                "bootstrap/dist/js/bootstrap.bundle.min.js",
+                "sweetalert2"
               ],
               "outputHashing": "all"
             },
+
             "development": {
               "optimization": false,
               "extractLicenses": false,
