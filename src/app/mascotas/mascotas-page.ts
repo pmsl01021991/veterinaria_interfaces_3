@@ -13,7 +13,7 @@ export class Mascotas implements OnInit {
   searchTerm: string = '';
   mascotas: any[] = [];
 
-  private apiUrl = 'https://backend-veterinaria1.onrender.com/mascotas'; // 🔹 URL de Render
+  private apiUrl = 'https://backend-veterinaria-qedk.onrender.com/mascotas'; // 🔹 URL de Render
 
   async ngOnInit() {
     await this.cargarMascotas();

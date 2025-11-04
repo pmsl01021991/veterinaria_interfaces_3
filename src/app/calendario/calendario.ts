@@ -162,7 +162,7 @@ export class Calendario {
 
     try {
       // 🔹 Guardar mascota en Render
-      const resMascota = await fetch('https://backend-veterinaria1.onrender.com/mascotas', {
+      const resMascota = await fetch('https://backend-veterinaria-qedk.onrender.com/mascotas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevaMascota),
@@ -180,7 +180,7 @@ export class Calendario {
         telefono: this.telefonoDuenio,
       };
 
-      const resCita = await fetch('https://backend-veterinaria1.onrender.com/citas', {
+      const resCita = await fetch('https://backend-veterinaria-qedk.onrender.com/citas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(nuevaCita),

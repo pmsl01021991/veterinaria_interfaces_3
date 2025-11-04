@@ -1,5 +1,5 @@
 // ✅ URL base del backend en Render
-const BASE_URL = 'https://backend-veterinaria1.onrender.com/api';
+const BASE_URL = 'https://backend-veterinaria-qedk.onrender.com';
 
 // --- INTERFACES ---
 export interface Usuario {

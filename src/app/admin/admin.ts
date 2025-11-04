@@ -18,7 +18,7 @@ export class Admin implements OnInit {
   // 🔹 Obtener citas desde Render
   async cargarCitas() {
     try {
-      const res = await fetch('https://backend-veterinaria1.onrender.com/citas');
+      const res = await fetch('https://backend-veterinaria-qedk.onrender.com/citas');
       if (!res.ok) throw new Error('Error al obtener citas');
       this.citas = await res.json();
     } catch (err) {
@@ -33,7 +33,7 @@ export class Admin implements OnInit {
     if (!cita || !confirm('¿Seguro que deseas eliminar esta cita?')) return;
 
     try {
-      const res = await fetch(`https://backend-veterinaria1.onrender.com/citas/${cita.id}`, {
+      const res = await fetch(`https://backend-veterinaria-qedk.onrender.com/citas/${cita.id}`, {
         method: 'DELETE'
       });
 
