@@ -1,30 +1,44 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { mascotas } from '../../backend';
 
 @Component({
   selector: 'app-mascotas',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './mascotas.html',
-  styleUrl: './mascotas.css'
+  styleUrls: ['./mascotas.css']
 })
-export class Mascotas {
+export class Mascotas implements OnInit {
   searchTerm: string = '';
+  mascotas: any[] = [];
 
-  mascotas = mascotas;
+  private apiUrl = 'https://backend-veterinaria1.onrender.com/mascotas'; // 🔹 URL de Render
 
+  async ngOnInit() {
+    await this.cargarMascotas();
+  }
 
-  constructor() {
-    // 🐾 Cargar mascotas desde localStorage si existen
-    const guardadas = JSON.parse(localStorage.getItem('mascotas') || '[]');
-    if (guardadas.length > 0) {
-      this.mascotas = [...this.mascotas, ...guardadas];
+  // 🐾 Cargar mascotas desde Render (backend)
+  async cargarMascotas() {
+    try {
+      const res = await fetch(this.apiUrl);
+      if (!res.ok) throw new Error('Error al cargar mascotas');
+      const data = await res.json();
+
+      // Guardamos también en localStorage para persistencia local
+      localStorage.setItem('mascotas', JSON.stringify(data));
+      this.mascotas = data;
+    } catch (error) {
+      console.error('❌ Error cargando mascotas desde Render:', error);
+
+      // Si falla Render, usa las guardadas localmente
+      const guardadas = JSON.parse(localStorage.getItem('mascotas') || '[]');
+      this.mascotas = guardadas;
     }
   }
 
-  // Getter que filtra las mascotas según el texto ingresado
+  // 🔍 Getter que filtra las mascotas según el texto ingresado
   get mascotasFiltradas() {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.mascotas;
