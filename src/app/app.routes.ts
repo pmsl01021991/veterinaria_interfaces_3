@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 import { Home } from './modules/pages/home/home';
 import { Gallery } from './modules/pages/gallery/gallery';
-import { DuenoComponent } from './dueno/dueno';
 import { Mascotas } from './mascotas/mascotas-page';
 import { Calendario } from './calendario/calendario';
 import { Admin } from './admin/admin';
+import {Citas} from './citas/citas'
 
 export const routes: Routes = [
   { path: '', component: Home },                         // Página principal
@@ -12,8 +12,10 @@ export const routes: Routes = [
   
 
   // Rutas para dueños y mascotas
-  { path: 'duenos', component: DuenoComponent },
   { path: 'mascotas', component: Mascotas },
+
+  { path: 'citas', component: Citas },
+
 
 
   // 🔹 Nueva ruta para el panel del administrador

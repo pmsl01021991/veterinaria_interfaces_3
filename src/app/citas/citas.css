@@ -1,0 +1,103 @@
+/* 🎨 ESTILOS PARA PÁGINA DE CITAS (Diseño en Cards) */
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8f9fa, #e9ecef);
+  padding: 2rem;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Título principal */
+h2 {
+  text-align: center;
+  color: #343a40;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  letter-spacing: 0.5px;
+}
+
+/* Contenedor general */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Tarjetas */
+.card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado de la tarjeta */
+.card-header {
+  background: #17a2b8 !important; /* Color info */
+  color: white !important;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* Cuerpo de la tarjeta */
+.card-body {
+  background-color: #ffffff;
+  padding: 1rem 1.25rem;
+}
+
+.card-body p {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+/* Botones */
+.btn {
+  font-weight: 500;
+  border-radius: 8px;
+  padding: 6px 12px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border: none;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border: none;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #b02a37;
+}
+
+/* Loader o texto de carga */
+.text-muted {
+  color: #6c757d !important;
+  font-size: 1.1rem;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .col-md-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+}

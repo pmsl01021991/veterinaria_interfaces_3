@@ -1,0 +1,30 @@
+<div class="container mt-5 pt-5">
+  <h2 class="text-center mb-4">📅 Citas de Mascotas</h2>
+
+  <div *ngIf="cargando" class="text-center text-muted">
+    Cargando citas...
+  </div>
+
+  <div class="row g-3" *ngIf="!cargando">
+    <div class="col-md-4" *ngFor="let c of citas">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-info text-white fw-bold">
+          {{ c.duenio | titlecase }} — {{ c.nombre | titlecase }}
+        </div>
+        <div class="card-body">
+          <p><strong>Teléfono:</strong> {{ c.telefono }}</p>
+          <p><strong>Notas:</strong> {{ c.notas }}</p>
+
+          <div class="d-flex justify-content-between mt-3">
+            <button class="btn btn-warning btn-sm" (click)="editarCita(c.id)">
+              ✏️ Editar
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="eliminarCita(c.id)">
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
