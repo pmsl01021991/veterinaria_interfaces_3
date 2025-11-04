@@ -3,10 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "ng build",
-    "start": "ng serve",
-    "postinstall": "ng build",
-    "test": "ng test"
+    "build": "ng build --configuration production",
+    "start": "serve -s dist/mi-proyecto01/browser -l 8080"
   },
   "dependencies": {
     "@angular/animations": "20.3.4",
@@ -30,7 +28,6 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.5",
-    "@angular/build": "20.3.5",
     "@angular/cli": "20.3.5",
     "@angular/compiler-cli": "20.3.4",
     "typescript": "5.9.3"
