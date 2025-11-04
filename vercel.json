@@ -2,25 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "dist/mi-proyecto01/browser/index.html",
-      "use": "@vercel/static"
+      "src": "angular.json",
+      "use": "@vercel/angular"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/dist/mi-proyecto01/browser/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/.*",
-      "dest": "/dist/mi-proyecto01/browser/index.html"
+      "dest": "/index.html"
     }
   ]
 }
