@@ -38,7 +38,7 @@ export class Mascotas implements OnInit {
     }
   }
 
-  // 🔍 Getter que filtra las mascotas según el texto ingresado
+  // 🔍 Getter que filtra las mascotas según el texto ingresado de la pagina
   get mascotasFiltradas() {
     const term = this.searchTerm.trim().toLowerCase();
     if (!term) return this.mascotas;
