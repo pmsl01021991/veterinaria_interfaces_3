@@ -1,29 +1,116 @@
 <div class="container mt-5 pt-5">
   <h2 class="text-center mb-4">📅 Citas de Mascotas</h2>
 
+  <!-- buscador -->
+  <div class="mb-3 d-flex justify-content-center">
+    <input type="text" class="form-control w-50" placeholder="Buscar por dueño o mascota..." [(ngModel)]="searchTerm" (input)="filtrarCitas()" />
+  </div>
+
+  <!-- boton agregar -->
+  <div class="text-center mb-3">
+    <button class="btn btn-success" (click)="abrirFormularioNuevaCita()">➕ Agregar cita</button>
+  </div>
+
+  <!-- formulario modal para nueva cita -->
+  <div *ngIf="mostrarFormulario" class="modal-backdrop">
+    <div class="modal-content p-4 rounded shadow">
+      <h5 class="mb-3 text-center">➕ Nueva Cita</h5>
+
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <input class="form-control" placeholder="Nombre del dueño" [(ngModel)]="nuevaCita.duenio" />
+        </div>
+        <div class="col-md-6 mb-2">
+          <input class="form-control" placeholder="Nombre de la mascota" [(ngModel)]="nuevaCita.nombre" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-2">
+          <select class="form-control" [(ngModel)]="nuevaCita.tipo">
+            <option value="perro">Perro</option>
+            <option value="gato">Gato</option>
+            <option value="ave">Ave</option>
+            <option value="pez">Pez</option>
+          </select>
+        </div>
+        <div class="col-md-4 mb-2">
+          <input class="form-control" placeholder="Raza" [(ngModel)]="nuevaCita.raza" />
+        </div>
+        <div class="col-md-4 mb-2">
+          <select class="form-control" [(ngModel)]="nuevaCita.servicio">
+            <option *ngFor="let s of servicios" [value]="s">{{ s | titlecase }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <input class="form-control" placeholder="Teléfono" [(ngModel)]="nuevaCita.telefono" />
+        </div>
+        <div class="col-md-6 mb-2">
+          <input class="form-control" placeholder="Edad (opcional)" [(ngModel)]="nuevaCita.edad" />
+        </div>
+      </div>
+
+      <div class="mb-2">
+        <textarea class="form-control" rows="2" placeholder="Notas (opcional)" [(ngModel)]="nuevaCita.notas"></textarea>
+      </div>
+
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-success" (click)="agregarCita()">💾 Guardar</button>
+        <button class="btn btn-secondary" (click)="cerrarFormulario()">❌ Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- spinner -->
   <div *ngIf="cargando" class="text-center text-muted">
     Cargando citas...
   </div>
 
+  <!-- lista -->
   <div class="row g-3" *ngIf="!cargando">
-    <div class="col-md-4" *ngFor="let c of citas">
+    <div class="col-md-4" *ngFor="let c of citasFiltradas">
       <div class="card shadow-sm border-0">
-        <div class="card-header bg-info text-white fw-bold">
+        <div class="card-header bg-info text-white fw-bold d-flex align-items-center">
+          <img [src]="getIconoGenero(c.duenio)" alt="icono" width="28" height="28" class="me-2 rounded-circle border border-light" />
           {{ c.duenio | titlecase }} — {{ c.nombre | titlecase }}
         </div>
         <div class="card-body">
           <p><strong>Teléfono:</strong> {{ c.telefono }}</p>
+          <p><strong>Servicio:</strong> {{ c.servicio }}</p>
           <p><strong>Notas:</strong> {{ c.notas }}</p>
 
           <div class="d-flex justify-content-between mt-3">
-            <button class="btn btn-warning btn-sm" (click)="editarCita(c.id)">
-              ✏️ Editar
-            </button>
-            <button class="btn btn-danger btn-sm" (click)="eliminarCita(c.id)">
-              🗑️ Eliminar
-            </button>
+            <button class="btn btn-warning btn-sm" (click)="editarCita(c.id)">✏️ Editar</button>
+            <button class="btn btn-danger btn-sm" (click)="eliminarCita(c.id)">🗑️ Eliminar</button>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- modal edición (igual que tenías) -->
+  <div *ngIf="citaEditando" class="modal-backdrop">
+    <div class="modal-content p-4 rounded shadow">
+      <h5 class="mb-3 text-center">✏️ Editar Cita</h5>
+
+      <label>Dueño:</label>
+      <input type="text" class="form-control mb-2" [(ngModel)]="citaEditando.duenio" />
+
+      <label>Mascota:</label>
+      <input type="text" class="form-control mb-2" [(ngModel)]="citaEditando.nombre" />
+
+      <label>Teléfono:</label>
+      <input type="text" class="form-control mb-2" [(ngModel)]="citaEditando.telefono" />
+
+      <label>Notas:</label>
+      <textarea class="form-control mb-3" rows="2" [(ngModel)]="citaEditando.notas"></textarea>
+
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-success btn-sm" (click)="guardarEdicion()">💾 Guardar</button>
+        <button class="btn btn-secondary btn-sm" (click)="cancelarEdicion()">❌ Cancelar</button>
       </div>
     </div>
   </div>
