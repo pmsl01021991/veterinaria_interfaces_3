@@ -1,0 +1,60 @@
+<div class="historial-container">
+  <h2>Gestión de Citas</h2>
+
+  <div class="filtros">
+    <input
+      type="text"
+      [(ngModel)]="filtro"
+      placeholder="Buscar por mascota, cliente o motivo..."
+    />
+
+    <select [(ngModel)]="filtroEstado">
+      <option value="Todos">Todos</option>
+      <option value="Pendiente">Pendiente</option>
+      <option value="Confirmada">Confirmada</option>
+      <option value="Completada">Completada</option>
+      <option value="Cancelada">Cancelada</option>
+    </select>
+  </div>
+
+  <table *ngIf="!cargando; else cargandoTpl">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Mascota</th>
+        <th>Cliente</th>
+        <th>Motivo</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of citasFiltradas">
+        <td>{{ c.id }}</td>
+        <td>{{ c.fecha || 'Sin fecha' }}</td>
+        <td>{{ c.nombre }}</td>
+        <td>{{ c.duenio }}</td>
+        <td>{{ c.servicio }}</td>
+        <td>
+          <span [class]="
+              c.estado === 'Completada' ? 'estado completada' :
+              c.estado === 'Pendiente' ? 'estado pendiente' :
+              c.estado === 'Cancelada' ? 'estado cancelada' :
+              c.estado === 'Confirmada' ? 'estado confirmada' : ''
+          ">
+            {{ c.estado || 'Pendiente' }}
+          </span>
+        </td>
+        <td>
+          <button class="editar">Editar</button>
+          <button class="eliminar" (click)="eliminar(c.id)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ng-template #cargandoTpl>
+    <p class="cargando">Cargando citas...</p>
+  </ng-template>
+</div>

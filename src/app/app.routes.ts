@@ -5,6 +5,7 @@ import { Mascotas } from './mascotas/mascotas-page';
 import { Calendario } from './calendario/calendario';
 import { Admin } from './admin/admin';
 import {Citas} from './citas/citas'
+import { Historial } from './historial/historial';
 
 export const routes: Routes = [
   { path: '', component: Home },                         // Página principal
@@ -16,7 +17,7 @@ export const routes: Routes = [
 
   { path: 'citas', component: Citas },
 
-
+  { path: 'historial', component: Historial },
 
   // 🔹 Nueva ruta para el panel del administrador
   { path: 'admin', component: Admin },

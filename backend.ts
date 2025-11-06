@@ -14,10 +14,10 @@ export interface Mascota {
   tipo: string;
   nombre: string;
   raza: string;
-  edad: string;
+  edad?: string;
   duenio: string;
   telefono: string;
-  notas: string;
+  notas?: string;
   icono: string;
 }
 
@@ -26,8 +26,8 @@ export interface Cita {
   fecha?: string;
   hora?: string;
   servicio?: string;
+  estado?: string;
   mascotaId?: number;
-  // 🔹 Extra opcional para integración directa con mascota:
   duenio?: string;
   nombre?: string;
   telefono?: string;
@@ -37,7 +37,7 @@ export interface Cita {
   icono?: string;
 }
 
-// --- FUNCIONES FETCH ---
+// --- USUARIOS ---
 export async function getUsuarios(): Promise<Usuario[]> {
   const res = await fetch(`${BASE_URL}/usuarios`);
   return res.json();
@@ -65,16 +65,14 @@ export async function crearMascota(mascota: Mascota) {
   });
 }
 
-// 🔹 Actualizar mascota (usado también para editar citas)
-export async function actualizarMascota(id: number, datosActualizados: any) {
+export async function actualizarMascota(id: number, datosActualizados: Partial<Mascota>) {
   try {
     const res = await fetch(`${BASE_URL}/mascotas/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(datosActualizados),
+      body: JSON.stringify(datosActualizados)
     });
-
-    if (!res.ok) throw new Error('Error al actualizar la mascota');
+    if (!res.ok) throw new Error('Error al actualizar mascota');
     return await res.json();
   } catch (error) {
     console.error('❌ Error al actualizar mascota:', error);
@@ -82,45 +80,91 @@ export async function actualizarMascota(id: number, datosActualizados: any) {
   }
 }
 
-// 🐾 --- CITAS ---
+export async function eliminarMascota(id: number) {
+  await fetch(`${BASE_URL}/mascotas/${id}`, {
+    method: 'DELETE'
+  });
+}
+
+// 📅 --- CITAS ---
 export async function getCitas(): Promise<Cita[]> {
   const res = await fetch(`${BASE_URL}/citas`);
   return res.json();
 }
 
 export async function crearCita(cita: Cita) {
-  await fetch(`${BASE_URL}/citas`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(cita)
-  });
-}
-
-export async function eliminarCita(id: number) {
-  await fetch(`${BASE_URL}/citas/${id}`, {
-    method: 'DELETE'
-  });
-}
-
-// 🟢 NUEVO: Función combinada para crear o actualizar tanto cita como mascota
-export async function guardarCitaYActualizarMascota(cita: Cita) {
   try {
-    // 1️⃣ Guardar la cita
-    await crearCita(cita);
+    // 1️⃣ Crear la cita en el backend
+    const res = await fetch(`${BASE_URL}/citas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cita)
+    });
+    if (!res.ok) throw new Error('Error al crear cita');
 
-    // 2️⃣ Buscar la mascota por nombre o ID
+    // 2️⃣ Buscar mascota por nombre o ID
     const mascotas = await getMascotas();
-    const mascota = mascotas.find(m => m.nombre.toLowerCase() === cita.nombre?.toLowerCase());
+    const mascotaExistente = mascotas.find(
+      m => m.nombre.toLowerCase() === (cita.nombre || '').toLowerCase()
+    );
 
-    // 3️⃣ Si existe, actualizar datos del dueño o teléfono
-    if (mascota && mascota.id) {
-      await actualizarMascota(mascota.id, {
+    // 3️⃣ Si la mascota existe, actualiza datos; si no, créala
+    if (mascotaExistente && mascotaExistente.id) {
+      await actualizarMascota(mascotaExistente.id, {
         duenio: cita.duenio,
         telefono: cita.telefono,
         notas: cita.notas
       });
+    } else {
+      const nuevaMascota: Mascota = {
+        tipo: cita.tipo || 'perro',
+        nombre: cita.nombre || '',
+        raza: cita.raza || '',
+        edad: '',
+        duenio: cita.duenio || '',
+        telefono: cita.telefono || '',
+        notas: cita.notas || '',
+        icono: cita.icono || 'assets/huellitas/Imagenes/perro.png'
+      };
+      await crearMascota(nuevaMascota);
     }
   } catch (error) {
-    console.error('❌ Error guardando cita y actualizando mascota:', error);
+    console.error('❌ Error guardando cita:', error);
+  }
+}
+
+export async function actualizarCita(id: number, datosActualizados: Partial<Cita>) {
+  try {
+    const res = await fetch(`${BASE_URL}/citas/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datosActualizados)
+    });
+    if (!res.ok) throw new Error('Error al actualizar cita');
+    return await res.json();
+  } catch (error) {
+    console.error('❌ Error al actualizar cita:', error);
+    throw error;
+  }
+}
+
+export async function eliminarCita(id: number) {
+  try {
+    await fetch(`${BASE_URL}/citas/${id}`, {
+      method: 'DELETE'
+    });
+  } catch (error) {
+    console.error('❌ Error eliminando cita:', error);
+  }
+}
+
+// 🟢 --- SINCRONIZACIÓN GLOBAL ---
+// Cada vez que se guarda una cita, se asegura coherencia con mascota e historial
+export async function guardarCitaYActualizarMascota(cita: Cita) {
+  try {
+    await crearCita(cita);
+    console.log('✅ Cita y mascota sincronizadas correctamente');
+  } catch (error) {
+    console.error('❌ Error sincronizando cita y mascota:', error);
   }
 }
