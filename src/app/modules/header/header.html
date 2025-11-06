@@ -20,20 +20,18 @@
 
     <!-- Botón hamburguesa -->
     <button
-      id="navbarToggler"
       class="navbar-toggler"
       type="button"
+      (click)="toggleNavbar()"
       aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-      (click)="toggleNavbar()"   
-    >
-      <span class="navbar-toggler-icon"></span>
+      aria-expanded="{{ menuAbierto }}"
+      aria-label="Toggle navigation">
+      ☰
     </button>
 
-
-
-    
+    <div id="navbarNav" class="navbar-collapse" [class.show]="menuAbierto">
+      <!-- tu contenido de menú -->
+    </div> 
     <!-- Menú -->
   <div class="collapse navbar-collapse" id="navbarNav">
       

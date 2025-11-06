@@ -1,10 +1,8 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Authentication } from '../authentication/authentication';
-
-declare var bootstrap: any;
 
 type UserStored = {
   name?: string;
@@ -21,61 +19,29 @@ type UserStored = {
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
-export class Header implements OnInit, AfterViewInit {
+export class Header implements OnInit {
   mostrarAuth = false;
   mostrarCalendario = false;
   mostrarSubmenu = false;
   user: { name: string; rol: 'admin' | 'cliente' } | null = null;
+  menuAbierto = false; // ✅ Controla el menú hamburguesa
 
-
-  private collapseRef: any | null = null;
   constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.cargarUsuario();
-    this.autoCloseOnLinkClick();
 
-    // Cerrar el menú cuando cambias de ruta
+    // Cierra el menú al cambiar de ruta
     this.router.events.subscribe((e) => {
-      if (e instanceof NavigationEnd) this.hideNavbar();
+      if (e instanceof NavigationEnd) this.menuAbierto = false;
     });
 
-    // 🔹 Detectar cambios en localStorage (por login o logout)
-    window.addEventListener('storage', () => {
-      this.cargarUsuario();
-    });
+    // Detecta cambios en localStorage
+    window.addEventListener('storage', () => this.cargarUsuario());
   }
 
-
-    ngAfterViewInit(): void {
-      const navEl = document.getElementById('navbarNav');
-      if (navEl) {
-        // Creamos/obtenemos la instancia pero SIN abrir automáticamente
-        this.collapseRef = bootstrap.Collapse.getOrCreateInstance(navEl, { toggle: false });
-      }
-    }
-
-    toggleNavbar(): void {
-      // Asegura que siempre haya instancia válida
-      const navEl = document.getElementById('navbarNav');
-      if (!this.collapseRef && navEl) {
-        this.collapseRef = bootstrap.Collapse.getOrCreateInstance(navEl, { toggle: false });
-      }
-      this.collapseRef?.toggle();
-    }
-
-  private hideNavbar(): void {
-    const navEl = document.getElementById('navbarNav');
-    if (!navEl) return;
-    const instance = bootstrap.Collapse.getOrCreateInstance(navEl, { toggle: false });
-    instance.hide();
-  }
-
-  private autoCloseOnLinkClick(): void {
-    // Cierra al hacer clic en cualquier link del menú (comportamiento móvil)
-    document.querySelectorAll('.navbar-nav .nav-link').forEach((link) => {
-      link.addEventListener('click', () => this.hideNavbar());
-    });
+  toggleNavbar(): void {
+    this.menuAbierto = !this.menuAbierto;
   }
 
   private cargarUsuario(): void {
@@ -94,7 +60,6 @@ export class Header implements OnInit, AfterViewInit {
     }
   }
 
-
   logout(): void {
     localStorage.removeItem('user');
     this.user = null;
@@ -110,41 +75,29 @@ export class Header implements OnInit, AfterViewInit {
     this.mostrarAuth = false;
   }
 
-abrirCalendario(event?: Event) {
-  if (event) event.preventDefault();
-
-  const usuarioRegistrado = localStorage.getItem('user');
-
-  // Si NO hay usuario -> mostramos autenticación
-  if (!usuarioRegistrado) {
-    alert('Debes iniciar sesión o registrarte antes de separar una cita.');
-    this.mostrarAuth = true;
-    return;
+  abrirCalendario(event?: Event) {
+    if (event) event.preventDefault();
+    const usuarioRegistrado = localStorage.getItem('user');
+    if (!usuarioRegistrado) {
+      alert('Debes iniciar sesión o registrarte antes de separar una cita.');
+      this.mostrarAuth = true;
+      return;
+    }
+    this.router.navigate(['/calendario']).then(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 
-  // Si SÍ hay usuario -> navegamos al calendario
-  this.router.navigate(['/calendario']).then(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-}
-
-
-    onSubmit(form: any) {
+  onRegister(form: any) {
     if (form.valid) {
-      const modalEl = document.getElementById('registroModal');
-      if (modalEl) {
-        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.hide();
+      const { email, password, confirmPassword } = form.value;
+      if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden.');
+        return;
       }
-
-      document.body.classList.remove('modal-open');
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) backdrop.remove();
-      document.body.style.overflow = 'auto';
-
-      this.router.navigate(['/calendario']).then(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      alert('✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.');
+    } else {
+      alert('Por favor completa todos los campos.');
     }
   }
 
@@ -158,22 +111,4 @@ abrirCalendario(event?: Event) {
     this.mostrarSubmenu = false;
     this.router.navigate(['/admin']);
   }
-
-  onRegister(form: any) {
-  if (form.valid) {
-    const { email, password, confirmPassword } = form.value;
-
-    if (password !== confirmPassword) {
-      alert('Las contraseñas no coinciden.');
-      return;
-    }
-
-    console.log('Usuario registrado:', email);
-    alert('✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.');
-  } else {
-    alert('Por favor completa todos los campos.');
-  }
 }
-
-}
- 

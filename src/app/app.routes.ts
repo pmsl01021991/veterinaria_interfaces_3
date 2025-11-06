@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { Home } from './modules/pages/home/home';
-import { Gallery } from './modules/pages/gallery/gallery';
 import { Mascotas } from './mascotas/mascotas-page';
 import { Calendario } from './calendario/calendario';
 import { Admin } from './admin/admin';
@@ -10,8 +9,6 @@ import { Expediente } from './expediente/expediente';
 
 export const routes: Routes = [
   { path: '', component: Home },                         // Página principal
-  { path: 'gallery', component: Gallery },                // Galería
-  
 
   // Rutas para dueños y mascotas
   { path: 'mascotas', component: Mascotas },

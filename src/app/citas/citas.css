@@ -90,17 +90,7 @@ h2 {
   font-size: 1.1rem;
 }
 
-/* Responsivo */
-@media (max-width: 768px) {
-  .col-md-4 {
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
 
-  h2 {
-    font-size: 1.3rem;
-  }
-}
 
 .modal-backdrop {
   position: fixed;

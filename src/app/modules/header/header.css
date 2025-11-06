@@ -37,11 +37,9 @@
   text-decoration: underline;
 }
 
-
-
 /* Tamaño base del logo */
 .brand-logo {
-    height: 48px;    /* ajusta según lo que se vea bien */
+    height: 48px;
     width: auto;
     object-fit: contain;
 }
@@ -58,4 +56,81 @@
     .brand-logo {
         height: 34px;
     }
+}
+
+/* ================================================
+   🟢 ESTILOS DEL BOTÓN HAMBURGUESA SIN BOOTSTRAP JS
+   ================================================ */
+
+/* Botón hamburguesa */
+.navbar-toggler {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #333;
+  transition: transform 0.2s ease;
+}
+
+.navbar-toggler:hover {
+  transform: scale(1.1);
+}
+
+/* Contenedor del menú (versión móvil) */
+.navbar-collapse {
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: white;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #ddd;
+  padding: 10px 20px;
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+/* Cuando está abierto */
+.navbar-collapse.show {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* En escritorio el menú siempre visible */
+@media (min-width: 992px) {
+  .navbar-collapse {
+    display: flex !important;
+    flex-direction: row;
+    position: static;
+    background: none;
+    opacity: 1;
+    transform: none;
+    border: none;
+    padding: 0;
+  }
+
+  .navbar-toggler {
+    display: none;
+  }
+}
+
+/* Enlaces del menú */
+.navbar-nav .nav-link {
+  color: #333;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px 12px;
+  display: block;
+  transition: background 0.2s, color 0.2s;
+}
+
+.navbar-nav .nav-link:hover {
+  background-color: #f0f0f0;
+  color: #22c55e;
+  border-radius: 6px;
 }

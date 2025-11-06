@@ -1,14 +1,4 @@
 
-/* Bootstrap (asset-based) */
-/* Bootstrap (asset-based) */
-@import url('assets/huellitas/css/bootstrap-reboot.css');
-@import url('assets/huellitas/css/bootstrap-grid.css');
-@import 'bootstrap/dist/css/bootstrap.min.css';
-
-
-
-/* You can add global styles to this file, and also import other style files */
-@import "bootstrap/dist/css/bootstrap.min.css";
 /* === Huellitas custom styles appended === */
 body {
 	margin: 0;
@@ -112,35 +102,6 @@ iframe {
 	left: 0;
 	width: 100%;
 	height: 100%;
-}
-
-
-
-/* carrusel*/
-
-.carousel-container {
-	width: 100%;
-	overflow: hidden;
-	background-color: white;
-	padding: 20px 0;
-}
-
-.carousel {
-	display: flex;
-	gap: 15px;
-	animation: scroll 5s linear infinite;
-}
-
-.carousel img {
-	width: 150px;
-	height: auto;
-	border-radius: 10px;
-	object-fit: contain;
-	transition: transform 0.10s;
-}
-
-.carousel img:hover {
-	transform: scale(1.1);
 }
 
 
