@@ -24,21 +24,20 @@
       type="button"
       (click)="toggleNavbar()"
       aria-controls="navbarNav"
-      aria-expanded="{{ menuAbierto }}"
+      [attr.aria-expanded]="menuAbierto"
       aria-label="Toggle navigation">
       ☰
     </button>
 
-    <div id="navbarNav" class="navbar-collapse" [class.show]="menuAbierto">
-      <!-- tu contenido de menú -->
-    </div> 
     <!-- Menú -->
-  <div class="collapse navbar-collapse" id="navbarNav">
-      
+  <!-- Menú -->
+<div class="collapse navbar-collapse" [class.show]="menuAbierto" id="navbarNav">
+
+
     <ul class="navbar-nav ms-auto">
 
       <ng-container *ngIf="!user || user.rol !== 'admin'">
-        
+
         <li class="nav-item">
           <a class="nav-link" href="#sobre-nosotros">Sobre Nosotros</a>
         </li>
@@ -65,7 +64,7 @@
       </ng-container>
 
       <ng-container *ngIf="user && user.rol === 'admin'">
-        
+
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/mascotas']">Mascotas</a>
         </li>
@@ -75,7 +74,7 @@
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/historial']">Historial</a>
         </li>
-        
+
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/admin']">Panel de Administración</a>
         </li>
