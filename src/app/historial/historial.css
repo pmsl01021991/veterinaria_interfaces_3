@@ -1,64 +1,105 @@
-.historial-container {
-  padding: 1.5rem;
+/* 🩵 CONTENEDOR PRINCIPAL */
+.container {
+  max-width: 1000px;
+  margin: auto;
+}
+
+/* 🐾 TÍTULO */
+h2 {
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+/* 🔍 FILTROS */
+.filtros input,
+.filtros select {
+  min-width: 200px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  transition: all 0.3s ease;
+}
+
+.filtros input:focus,
+.filtros select:focus {
+  border-color: #6c63ff;
+  box-shadow: 0 0 5px rgba(108, 99, 255, 0.3);
+}
+
+/* 📋 TABLA */
+.table {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+  font-size: 15px;
 }
 
-.filtros {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
 }
 
-.filtros input, .filtros select {
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+.table td {
+  vertical-align: middle;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+/* 🌈 COLORES DE ESTADO */
+.badge {
+  font-size: 13px;
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-weight: 500;
 }
 
-th, td {
-  padding: 0.75rem;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+.bg-warning {
+  background-color: #ffc107 !important;
 }
 
-.estado {
-  padding: 0.25rem 0.75rem;
+.bg-success {
+  background-color: #28a745 !important;
+}
+
+.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+.bg-secondary {
+  background-color: #6c757d !important;
+}
+
+/* 🟩 BOTONES DE ACCIÓN */
+button.btn {
   border-radius: 8px;
-  color: #fff;
-  font-weight: bold;
+  font-size: 14px;
+  padding: 5px 10px;
+  transition: transform 0.2s, background 0.3s;
 }
 
-.completada { background-color: #4caf50; }
-.pendiente { background-color: #ff9800; }
-.cancelada { background-color: #f44336; }
-.confirmada { background-color: #2196f3; }
+button.btn:hover {
+  transform: scale(1.05);
+}
 
-button.editar {
-  background: #2196f3;
-  color: white;
+/* ✨ BOTONES ESPECÍFICOS */
+.btn-warning {
+  background-color: #ffc107;
   border: none;
-  border-radius: 5px;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
+  color: #000;
 }
 
-button.eliminar {
-  background: #f44336;
-  color: white;
+.btn-success {
+  background-color: #28a745;
   border: none;
-  border-radius: 5px;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
+  color: white;
 }
 
-.cargando {
-  text-align: center;
-  color: #777;
+.btn-danger {
+  background-color: #dc3545;
+  border: none;
+  color: white;
 }
+
+

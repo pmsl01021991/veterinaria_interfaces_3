@@ -1,14 +1,24 @@
-<div class="historial-container">
-  <h2>Gestión de Citas</h2>
+<div class="container mt-5 pt-5">
+  <h2 class="text-center mb-4">Gestión de Citas</h2>
 
-  <div class="filtros">
+  <div class="filtros mb-4 d-flex flex-wrap gap-2 justify-content-center">
     <input
       type="text"
-      [(ngModel)]="filtro"
+      class="form-control w-auto"
       placeholder="Buscar por mascota, cliente o motivo..."
+      [(ngModel)]="filtro"
     />
 
-    <select [(ngModel)]="filtroEstado">
+    <input
+      type="date"
+      class="form-control w-auto"
+      [(ngModel)]="fechaFiltro"
+    />
+
+    <select
+      class="form-select w-auto"
+      [(ngModel)]="filtroEstado"
+    >
       <option value="Todos">Todos</option>
       <option value="Pendiente">Pendiente</option>
       <option value="Confirmada">Confirmada</option>
@@ -17,44 +27,51 @@
     </select>
   </div>
 
-  <table *ngIf="!cargando; else cargandoTpl">
-    <thead>
-      <tr>
+  <div *ngIf="cargando" class="text-center text-muted">
+    Cargando citas...
+  </div>
+
+  <div *ngIf="!cargando && citasFiltradas.length > 0" class="table-responsive">
+    <table class="table table-bordered table-hover text-center align-middle shadow">
+    <thead class="table-light">
+        <tr>
         <th>ID</th>
         <th>Fecha</th>
+        <th>Hora</th>
         <th>Mascota</th>
         <th>Cliente</th>
         <th>Motivo</th>
         <th>Estado</th>
         <th>Acciones</th>
-      </tr>
+        </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let c of citasFiltradas">
+        <tr *ngFor="let c of citasFiltradas">
         <td>{{ c.id }}</td>
         <td>{{ c.fecha || 'Sin fecha' }}</td>
+        <td>{{ c.hora || 'Sin hora' }}</td>
         <td>{{ c.nombre }}</td>
         <td>{{ c.duenio }}</td>
         <td>{{ c.servicio }}</td>
         <td>
-          <span [class]="
-              c.estado === 'Completada' ? 'estado completada' :
-              c.estado === 'Pendiente' ? 'estado pendiente' :
-              c.estado === 'Cancelada' ? 'estado cancelada' :
-              c.estado === 'Confirmada' ? 'estado confirmada' : ''
-          ">
+            <span class="badge px-3 py-2 {{ obtenerClaseEstado(c.estado) }}">
             {{ c.estado || 'Pendiente' }}
-          </span>
+            </span>
         </td>
         <td>
-          <button class="editar">Editar</button>
-          <button class="eliminar" (click)="eliminar(c.id)">Eliminar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+            <button class="btn btn-sm btn-warning me-2" (click)="actualizarEstado(c, 'Confirmada')">Confirmar</button>
+            <button class="btn btn-sm btn-success me-2" (click)="actualizarEstado(c, 'Completada')">Completar</button>
+            <button class="btn btn-sm btn-danger" (click)="eliminar(c.id)">Eliminar</button>
+            <button class="btn btn-sm btn-primary me-2" (click)="verDetalle(c.id)">👁️ Ver</button>
 
-  <ng-template #cargandoTpl>
-    <p class="cargando">Cargando citas...</p>
-  </ng-template>
+        </td>
+        </tr>
+    </tbody>
+    </table>
+
+  </div>
+
+  <div *ngIf="!cargando && citasFiltradas.length === 0" class="text-center text-muted">
+    No hay citas registradas.
+  </div>
 </div>

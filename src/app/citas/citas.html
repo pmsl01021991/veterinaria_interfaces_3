@@ -44,6 +44,23 @@
         </div>
       </div>
 
+      <!-- 🗓️ Fecha y hora -->
+      <div class="row">
+        <div class="col-md-6 mb-2">
+          <label class="form-label">Fecha:</label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="nuevaCita.fecha"
+            [min]="hoy"
+          />
+        </div>
+        <div class="col-md-6 mb-2">
+          <label class="form-label">Hora:</label>
+          <input type="time" class="form-control" [(ngModel)]="nuevaCita.hora" />
+        </div>
+      </div>
+
       <div class="row">
         <div class="col-md-6 mb-2">
           <input class="form-control" placeholder="Teléfono" [(ngModel)]="nuevaCita.telefono" />
@@ -63,6 +80,8 @@
       </div>
     </div>
   </div>
+
+
 
   <!-- spinner -->
   <div *ngIf="cargando" class="text-center text-muted">

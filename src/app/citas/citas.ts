@@ -11,6 +11,7 @@ import { getMascotas, eliminarCita, actualizarMascota } from '../../../backend';
   styleUrls: ['./citas.css']
 })
 export class Citas implements OnInit {
+  hoy: string = new Date().toISOString().split('T')[0];
   citas: any[] = [];
   citasFiltradas: any[] = [];
   cargando = true;
@@ -76,34 +77,29 @@ export class Citas implements OnInit {
   }
 
   async agregarCita() {
-    
-
     if (!this.nuevaCita.duenio || !this.nuevaCita.nombre || !this.nuevaCita.telefono) {
-        alert('Completa dueño, mascota y teléfono.');
-        return;
-        }
+      alert('Completa dueño, mascota y teléfono.');
+      return;
+    }
 
-        // ✅ Asignar imagen de icono según tipo
-        const tipo = (this.nuevaCita.tipo || 'perro').toLowerCase();
-        let icono = '';
-
-        if (tipo.includes('gato')) {
-        icono = 'assets/huellitas/Imagenes/gato.webp';
-        } else {
-        icono = 'assets/huellitas/Imagenes/perro.png';
-        }
-
+    const tipo = (this.nuevaCita.tipo || 'perro').toLowerCase();
+    const icono = tipo.includes('gato')
+      ? 'assets/huellitas/Imagenes/gato.webp'
+      : 'assets/huellitas/Imagenes/perro.png';
 
     const nuevoRegistro = {
-      tipo: tipo,
+      tipo,
       icono,
       nombre: this.nuevaCita.nombre,
       raza: this.nuevaCita.raza || '',
-      edad: this.nuevaCita.edad ?? '',   // si no usas edad, puede quedar vacío
+      edad: this.nuevaCita.edad ?? '',
       duenio: this.nuevaCita.duenio,
       telefono: this.nuevaCita.telefono,
       notas: this.nuevaCita.notas || '',
-      servicio: this.nuevaCita.servicio || this.servicios[0]
+      servicio: this.nuevaCita.servicio || this.servicios[0],
+      fecha: this.nuevaCita.fecha || '', // 🟢 nueva propiedad
+      hora: this.nuevaCita.hora || '',   // 🟢 nueva propiedad
+      estado: 'Pendiente'
     };
 
     try {
@@ -115,7 +111,6 @@ export class Citas implements OnInit {
 
       if (!res.ok) throw new Error('Error creando cita');
 
-      // recargar lista y cerrar formulario
       await this.cargarCitas();
       this.mostrarFormulario = false;
       alert('✅ Cita agregada correctamente');
@@ -124,6 +119,7 @@ export class Citas implements OnInit {
       alert('No se pudo agregar la cita');
     }
   }
+
 
   async eliminarCita(id: number) {
     if (!confirm('¿Seguro que deseas eliminar esta cita?')) return;

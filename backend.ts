@@ -167,4 +167,19 @@ export async function guardarCitaYActualizarMascota(cita: Cita) {
   } catch (error) {
     console.error('❌ Error sincronizando cita y mascota:', error);
   }
+
+  // 📜 --- HISTORIAL ---
+// (Usa la misma fuente de datos que las citas actuales: /mascotas en Render)
+
+}
+
+  export async function getHistorial(): Promise<Cita[]> {
+  try {
+    const res = await fetch(`${BASE_URL}/mascotas`);
+    if (!res.ok) throw new Error('Error al obtener historial');
+    return await res.json();
+  } catch (error) {
+    console.error('❌ Error cargando historial:', error);
+    return [];
+  }
 }

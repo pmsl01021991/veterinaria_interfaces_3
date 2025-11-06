@@ -1,0 +1,22 @@
+.card {
+  border-radius: 12px;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4em 0.6em;
+}
+
+h6 {
+  font-weight: 600;
+  color: #555;
+}
+
+.table th {
+  width: 40%;
+  color: #444;
+}
+
+.table td {
+  color: #666;
+}
