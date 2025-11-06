@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, HostListener } from '@angular/core';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Authentication } from '../authentication/authentication';
+import { filter } from 'rxjs/operators';
 
 type UserStored = {
   name?: string;
@@ -17,31 +18,61 @@ type UserStored = {
   standalone: true,
   imports: [CommonModule, FormsModule, Authentication, RouterLink],
   templateUrl: './header.html',
-  styleUrl: './header.css'
+  styleUrls: ['./header.css']
 })
 export class Header implements OnInit {
   mostrarAuth = false;
   mostrarCalendario = false;
   mostrarSubmenu = false;
   user: { name: string; rol: 'admin' | 'cliente' } | null = null;
-  menuAbierto = false; // ✅ Controla el menú hamburguesa
+  menuAbierto = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private el: ElementRef<HTMLElement>) {}
 
   ngOnInit(): void {
     this.cargarUsuario();
 
-    // Cierra el menú al cambiar de ruta
-    this.router.events.subscribe((e) => {
-      if (e instanceof NavigationEnd) this.menuAbierto = false;
-    });
+    // Cierra menú y sube al inicio en cada navegación real
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(() => {
+        this.menuAbierto = false;
+        // usar 'auto' para que suba inmediato y evite parpadeos
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      });
 
-    // Detecta cambios en localStorage
+    // Detecta cambios en localStorage (login/logout en otra pestaña)
     window.addEventListener('storage', () => this.cargarUsuario());
   }
 
+  // Toggle del hamburguesa
   toggleNavbar(): void {
     this.menuAbierto = !this.menuAbierto;
+  }
+
+  // Úsalo en los <a> de menú con (click)="closeMenu()" si quieres cerrar al instante
+  closeMenu(): void {
+    this.menuAbierto = false;
+  }
+
+  // 1) Evita “doble clic” por href="#"
+  // 2) Cierra el menú si haces tap/clic fuera del panel o del botón
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(e: MouseEvent): void {
+    const target = e.target as HTMLElement;
+
+    // Evitar navegación fantasma por enlaces con href="#"
+    const anchorHash = target.closest('a[href="#"]') as HTMLAnchorElement | null;
+    if (anchorHash) e.preventDefault();
+
+    // Si el menú está abierto y haces clic fuera, ciérralo
+    if (this.menuAbierto) {
+      const clickedInsidePanel = !!target.closest('#navbarNav');
+      const clickedToggler = !!target.closest('.navbar-toggler');
+      if (!clickedInsidePanel && !clickedToggler) {
+        this.menuAbierto = false;
+      }
+    }
   }
 
   private cargarUsuario(): void {
@@ -66,17 +97,17 @@ export class Header implements OnInit {
     this.router.navigate(['/']).then(() => window.location.reload());
   }
 
-  abrirAuth() {
+  abrirAuth(): void {
     this.mostrarAuth = true;
     this.mostrarCalendario = false;
   }
 
-  cerrarAuth() {
+  cerrarAuth(): void {
     this.mostrarAuth = false;
   }
 
-  abrirCalendario(event?: Event) {
-    if (event) event.preventDefault();
+  abrirCalendario(event?: Event): void {
+    if (event) event.preventDefault(); // importante para evitar salto por href="#"
     const usuarioRegistrado = localStorage.getItem('user');
     if (!usuarioRegistrado) {
       alert('Debes iniciar sesión o registrarte antes de separar una cita.');
@@ -88,7 +119,7 @@ export class Header implements OnInit {
     });
   }
 
-  onRegister(form: any) {
+  onRegister(form: any): void {
     if (form.valid) {
       const { email, password, confirmPassword } = form.value;
       if (password !== confirmPassword) {
@@ -106,7 +137,7 @@ export class Header implements OnInit {
     return user?.rol === 'admin';
   }
 
-  irAlAdmin(event?: Event) {
+  irAlAdmin(event?: Event): void {
     if (event) event.preventDefault();
     this.mostrarSubmenu = false;
     this.router.navigate(['/admin']);
