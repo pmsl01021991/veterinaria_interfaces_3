@@ -1,7 +1,17 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
+
+import {
+  Firestore,
+  collection,
+  collectionData,
+  addDoc,
+  query,
+  where,
+} from '@angular/fire/firestore';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-authentication',
@@ -11,6 +21,7 @@ import Swal from 'sweetalert2';
   styleUrls: ['./authentication.css']
 })
 export class Authentication {
+
   username = '';
   password = '';
   password1 = '';
@@ -20,7 +31,7 @@ export class Authentication {
   termsAccepted = false;
   mostrarAuth = true;
 
-  private apiUrl = 'https://backend-veterinaria-qedk.onrender.com'; // 🔹 Tu backend en Render
+  private firestore = inject(Firestore);
 
   validarEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -39,7 +50,7 @@ export class Authentication {
     this.mostrarAuth = false;
   }
 
-  mostrarModal(titulo: string, mensaje: string, tipo: 'success' | 'error' | 'info' | 'warning') {
+  mostrarModal(titulo: string, mensaje: string, tipo: any) {
     Swal.fire({
       title: titulo,
       html: `<div style="font-size: 16px;">${mensaje}</div>`,
@@ -49,7 +60,9 @@ export class Authentication {
     });
   }
 
-  // ✅ LOGIN USANDO RENDER
+  // -----------------------------------------------------
+  // 🔥 LOGIN CON FIRESTORE
+  // -----------------------------------------------------
   async handleLogin(event: Event) {
     event.preventDefault();
 
@@ -63,7 +76,7 @@ export class Authentication {
       return;
     }
 
-    // 🟣 ADMIN LOCAL
+    // 🟣 ADMIN LOCAL (no cambia)
     if (this.username === 'admin@gmail.com' && this.password === 'pmsl123') {
       const adminUser = {
         username: this.username,
@@ -73,39 +86,51 @@ export class Authentication {
       localStorage.setItem('user', JSON.stringify(adminUser));
       this.mostrarModal('Bienvenido Administrador 👑', 'Inicio de sesión exitoso', 'success');
       this.cerrarAuth();
-      setTimeout(() => {
-        window.dispatchEvent(new Event('storage')); // actualiza el header sin recargar
-      }, 800);
-
+      setTimeout(() => window.dispatchEvent(new Event('storage')), 800);
+      return;
     }
 
     try {
-      const res = await fetch(`${this.apiUrl}/usuarios`);
-      if (!res.ok) throw new Error('Error al conectar con el servidor');
-
-      const usuarios = await res.json();
-
-      const user = usuarios.find(
-        (u: any) => u.username === this.username && u.password === this.password
+      // Buscar usuario en Firestore
+      const ref = collection(this.firestore, 'usuarios');
+      const filtro = query(
+        ref,
+        where('username', '==', this.username),
+        where('password', '==', this.password)
       );
 
-      if (user) {
-        const nombreLimpio = this.username.split('@')[0];
-        const usuarioLogueado = { ...user, name: nombreLimpio };
-        localStorage.setItem('user', JSON.stringify(usuarioLogueado));
-        this.mostrarModal('Inicio de sesión exitoso ✅', `¡Bienvenido ${nombreLimpio}!`, 'success');
-        this.cerrarAuth();
-        setTimeout(() => window.location.reload(), 1500);
-      } else {
+      const usuarios = await firstValueFrom(collectionData(filtro));
+
+      if (usuarios.length === 0) {
         this.mostrarModal('Error ❌', 'Credenciales incorrectas', 'error');
+        return;
       }
+
+      const user = usuarios[0];
+      const nombreLimpio = this.username.split('@')[0];
+
+      const usuarioLogueado = { ...user, name: nombreLimpio };
+
+      localStorage.setItem('user', JSON.stringify(usuarioLogueado));
+
+      this.mostrarModal(
+        'Inicio de sesión exitoso ✅',
+        `¡Bienvenido ${nombreLimpio}!`,
+        'success'
+      );
+
+      this.cerrarAuth();
+      setTimeout(() => window.location.reload(), 1500);
+
     } catch (error) {
       console.error('❌ Error en login:', error);
-      this.mostrarModal('Error de conexión', 'No se pudo contactar con el servidor.', 'error');
+      this.mostrarModal('Error de conexión', 'No se pudo contactar con Firestore.', 'error');
     }
   }
 
-  // ✅ REGISTRO USANDO RENDER
+  // -----------------------------------------------------
+  // 🔥 REGISTRO CON FIRESTORE
+  // -----------------------------------------------------
   async handleRegister(event: Event) {
     event.preventDefault();
 
@@ -125,38 +150,39 @@ export class Authentication {
     }
 
     try {
-      const res = await fetch(`${this.apiUrl}/usuarios`);
-      if (!res.ok) throw new Error('Error al conectar con el servidor');
-      const usuarios = await res.json();
+      // Verificar si ya existe
+      const ref = collection(this.firestore, 'usuarios');
+      const filtro = query(ref, where('username', '==', this.username));
 
-      if (usuarios.some((u: any) => u.username === this.username)) {
+      const resultado = await firstValueFrom(collectionData(filtro));
+
+      if (resultado.length > 0) {
         this.error = 'Este correo ya está registrado.';
         return;
       }
 
-      const nuevoUsuario = {
+      // Crear nuevo usuario
+      await addDoc(ref, {
         username: this.username,
         password: this.password1,
-        rol: 'cliente'
-      };
-
-      const resPost = await fetch(`${this.apiUrl}/usuarios`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nuevoUsuario)
+        rol: 'cliente',
       });
 
-      if (!resPost.ok) throw new Error('Error al registrar el usuario');
+      this.mostrarModal(
+        'Registro completado ✅',
+        'Tu cuenta ha sido creada correctamente',
+        'success'
+      );
 
-      this.mostrarModal('Registro completado ✅', 'Tu cuenta ha sido creada correctamente', 'success');
       this.username = '';
       this.password1 = '';
       this.password2 = '';
       this.error = '';
       this.showRegister = false;
+
     } catch (error) {
       console.error('❌ Error al registrar:', error);
-      this.mostrarModal('Error', 'No se pudo registrar el usuario.', 'error');
+      this.mostrarModal('Error', 'No se pudo registrar el usuario en Firestore.', 'error');
     }
   }
 

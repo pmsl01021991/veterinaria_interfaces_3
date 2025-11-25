@@ -5,8 +5,6 @@ import { Observable, firstValueFrom } from 'rxjs';
 export interface ServicioVeterinario {
   id: number;
   nombre: string;
-  descripcion: string;
-  duracion: number;
 }
 
 @Injectable({
@@ -26,11 +24,9 @@ export class ReservasService {
     const servicios = await firstValueFrom(servicios$);
 
     // Adaptación completa sin cambiar tu estructura
-    return servicios.map((s: any, index: number) => ({
-      id: s.id ?? index,
-      nombre: s.nombre,
-      descripcion: s.descripcion,
-      duracion: s.duracion ?? 30
+    return servicios.map((s: any) => ({
+      id: s.id,
+      nombre: s.nombre
     }));
   }
 
