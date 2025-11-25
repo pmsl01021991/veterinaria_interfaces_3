@@ -1,7 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { getMascotas, eliminarCita, actualizarMascota } from '../../../backend';
+
+import {
+  Firestore,
+  collection,
+  collectionData,
+  addDoc,
+  deleteDoc,
+  updateDoc,
+  doc
+} from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-citas',
@@ -11,21 +20,34 @@ import { getMascotas, eliminarCita, actualizarMascota } from '../../../backend';
   styleUrls: ['./citas.css']
 })
 export class Citas implements OnInit {
+
+  private firestore = inject(Firestore);
+
   hoy: string = new Date().toISOString().split('T')[0];
   citas: any[] = [];
   citasFiltradas: any[] = [];
   cargando = true;
+
   citaEditando: any = null;
-  mostrarFormulario = false; // controla el modal de crear cita
-  nuevaCita: any = { duenio: '', nombre: '', telefono: '', notas: '', tipo: 'perro', raza: '', servicio: 'consulta general' };
+  mostrarFormulario = false;
+
+  nuevaCita: any = {
+    duenio: '',
+    nombre: '',
+    telefono: '',
+    notas: '',
+    tipo: 'perro',
+    raza: '',
+    servicio: 'consulta general'
+  };
+
   searchTerm: string = '';
 
-  // Mapa de iconos por tipo (ajusta URLs si quieres)
   private iconosPorTipo: Record<string, string> = {
     perro: 'https://cdn-icons-png.flaticon.com/512/194/194279.png',
-    gato:  'https://cdn-icons-png.flaticon.com/512/1998/1998616.png',
-    ave:   'https://cdn-icons-png.flaticon.com/512/616/616554.png',
-    pez:   'https://cdn-icons-png.flaticon.com/512/616/616430.png',
+    gato: 'https://cdn-icons-png.flaticon.com/512/1998/1998616.png',
+    ave: 'https://cdn-icons-png.flaticon.com/512/616/616554.png',
+    pez: 'https://cdn-icons-png.flaticon.com/512/616/616430.png',
     default: 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
   };
 
@@ -42,14 +64,18 @@ export class Citas implements OnInit {
     await this.cargarCitas();
   }
 
+  // 🔥 CARGAR MASCOTAS DESDE FIRESTORE
   async cargarCitas() {
+    this.cargando = true;
     try {
-      this.cargando = true;
-      this.citas = await getMascotas();
-      this.citasFiltradas = this.citas;
+      const ref = collection(this.firestore, 'mascotas');
+      collectionData(ref, { idField: 'id' }).subscribe((data) => {
+        this.citas = data;
+        this.citasFiltradas = data;
+        this.cargando = false;
+      });
     } catch (err) {
       console.error(err);
-    } finally {
       this.cargando = false;
     }
   }
@@ -68,14 +94,22 @@ export class Citas implements OnInit {
 
   abrirFormularioNuevaCita() {
     this.mostrarFormulario = true;
-    // valores por defecto
-    this.nuevaCita = { duenio: '', nombre: '', telefono: '', notas: '', tipo: 'perro', raza: '', servicio: this.servicios[0] };
+    this.nuevaCita = {
+      duenio: '',
+      nombre: '',
+      telefono: '',
+      notas: '',
+      tipo: 'perro',
+      raza: '',
+      servicio: this.servicios[0]
+    };
   }
 
   cerrarFormulario() {
     this.mostrarFormulario = false;
   }
 
+  // 🔥 AGREGAR CITA A FIRESTORE
   async agregarCita() {
     if (!this.nuevaCita.duenio || !this.nuevaCita.nombre || !this.nuevaCita.telefono) {
       alert('Completa dueño, mascota y teléfono.');
@@ -83,13 +117,12 @@ export class Citas implements OnInit {
     }
 
     const tipo = (this.nuevaCita.tipo || 'perro').toLowerCase();
-    const icono = tipo.includes('gato')
-      ? 'assets/huellitas/Imagenes/gato.webp'
-      : 'assets/huellitas/Imagenes/perro.png';
 
     const nuevoRegistro = {
       tipo,
-      icono,
+      icono: tipo === 'gato'
+        ? 'assets/huellitas/Imagenes/gato.webp'
+        : 'assets/huellitas/Imagenes/perro.png',
       nombre: this.nuevaCita.nombre,
       raza: this.nuevaCita.raza || '',
       edad: this.nuevaCita.edad ?? '',
@@ -97,21 +130,13 @@ export class Citas implements OnInit {
       telefono: this.nuevaCita.telefono,
       notas: this.nuevaCita.notas || '',
       servicio: this.nuevaCita.servicio || this.servicios[0],
-      fecha: this.nuevaCita.fecha || '', // 🟢 nueva propiedad
-      hora: this.nuevaCita.hora || '',   // 🟢 nueva propiedad
+      fecha: this.nuevaCita.fecha || '',
+      hora: this.nuevaCita.hora || '',
       estado: 'Pendiente'
     };
 
     try {
-      const res = await fetch('https://backend-veterinaria-qedk.onrender.com/mascotas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nuevoRegistro)
-      });
-
-      if (!res.ok) throw new Error('Error creando cita');
-
-      await this.cargarCitas();
+      await addDoc(collection(this.firestore, 'mascotas'), nuevoRegistro);
       this.mostrarFormulario = false;
       alert('✅ Cita agregada correctamente');
     } catch (err) {
@@ -120,35 +145,38 @@ export class Citas implements OnInit {
     }
   }
 
-
-  async eliminarCita(id: number) {
+  // 🔥 ELIMINAR CITA DE FIRESTORE
+  async eliminarCita(id: string) {
     if (!confirm('¿Seguro que deseas eliminar esta cita?')) return;
+
     try {
-      await eliminarCita(id);
-      this.citas = this.citas.filter(c => c.id !== id);
-      this.filtrarCitas();
+      await deleteDoc(doc(this.firestore, 'mascotas', id));
+      alert('🗑 Eliminada correctamente');
     } catch (err) {
       console.error(err);
       alert('No se pudo eliminar');
     }
   }
 
-  editarCita(id: number) {
+  editarCita(id: string) {
     const cita = this.citas.find(c => c.id === id);
     if (cita) {
       this.citaEditando = { ...cita };
     }
   }
 
+  // 🔥 GUARDAR CAMBIOS EN FIRESTORE
   async guardarEdicion() {
     if (!this.citaEditando) return;
+
     try {
-      await actualizarMascota(this.citaEditando.id, this.citaEditando);
-      const idx = this.citas.findIndex(c => c.id === this.citaEditando.id);
-      if (idx !== -1) this.citas[idx] = { ...this.citaEditando };
-      this.citaEditando = null;
+      await updateDoc(
+        doc(this.firestore, 'mascotas', this.citaEditando.id),
+        this.citaEditando
+      );
+
       alert('✅ Cita actualizada');
-      this.filtrarCitas();
+      this.citaEditando = null;
     } catch (err) {
       console.error(err);
       alert('No se pudo actualizar');
@@ -159,13 +187,14 @@ export class Citas implements OnInit {
     this.citaEditando = null;
   }
 
-  // icono dueño según nombre (mantén tu función)
   getIconoGenero(nombre: string): string {
     const nombreLower = (nombre || '').trim().toLowerCase();
     const femeninos = ['ana','maria','sofia','carmen','laura','luisa','patricia','rosa','elena','valeria','gabriela','isabel','paola','lucia','mariana','alejandra','flor','diana','camila','jessica','karla'];
     const masculinos = ['juan','jose','carlos','luis','pedro','diego','andres','jorge','manuel','david','alejandro','francisco','miguel','ricardo','daniel','cristian','sergio','oscar','raul','eduardo'];
+
     const esF = femeninos.some(n => nombreLower.includes(n));
     const esM = masculinos.some(n => nombreLower.includes(n));
+
     if (esF) return 'https://cdn-icons-png.flaticon.com/512/921/921087.png';
     if (esM) return 'https://cdn-icons-png.flaticon.com/512/921/921094.png';
     return 'https://cdn-icons-png.flaticon.com/512/149/149071.png';

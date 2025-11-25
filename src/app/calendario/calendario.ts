@@ -1,10 +1,19 @@
-import { Component, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, NgZone, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FullCalendarModule } from '@fullcalendar/angular';
+
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
+
 import { ReservasService, ServicioVeterinario } from '../services/reservas.service';
+
+
+import {
+  Firestore,
+  collection,
+  addDoc
+} from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-calendario',
@@ -14,6 +23,9 @@ import { ReservasService, ServicioVeterinario } from '../services/reservas.servi
   styleUrls: ['./calendario.css'],
 })
 export class Calendario {
+
+  private firestore = inject(Firestore);
+
   wizardAbierto = false;
   paso = 1;
 
@@ -129,7 +141,8 @@ export class Calendario {
     return servicio ? servicio.nombre : '';
   }
 
-    async confirmarReserva() {
+  async confirmarReserva() {
+
     if (
       !this.fechaISO ||
       !this.servicioSeleccionado ||
@@ -146,7 +159,6 @@ export class Calendario {
     }
 
     const nuevaMascota = {
-      id: Date.now(),
       tipo: this.tipoMascota,
       nombre: this.nombreMascota,
       raza: this.razaMascota,
@@ -160,43 +172,31 @@ export class Calendario {
           : 'assets/huellitas/Imagenes/perro.png',
     };
 
+    const nuevaCita = {
+      fecha: this.fechaISO,
+      hora: this.horaSeleccionada,
+      servicio: this.nombreServicioSeleccionado,
+      nombreMascota: this.nombreMascota,
+      duenio: this.nombreDueno,
+      telefono: this.telefonoDuenio,
+    };
+
     try {
-      // 🔹 Guardar mascota en Render
-      const resMascota = await fetch('https://backend-veterinaria-qedk.onrender.com/mascotas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nuevaMascota),
-      });
-      if (!resMascota.ok) throw new Error('Error al guardar la mascota');
+      // 🔥 Guardar mascota en Firestore
+      await addDoc(collection(this.firestore, 'mascotas'), nuevaMascota);
 
-      // 🔹 Crear cita asociada en Render
-      const nuevaCita = {
-        id: Date.now(),
-        fecha: this.fechaISO,
-        hora: this.horaSeleccionada,
-        servicio: this.nombreServicioSeleccionado,
-        nombreMascota: this.nombreMascota,
-        duenio: this.nombreDueno,
-        telefono: this.telefonoDuenio,
-      };
+      // 🔥 Guardar cita en Firestore
+      await addDoc(collection(this.firestore, 'citas'), nuevaCita);
 
-      const resCita = await fetch('https://backend-veterinaria-qedk.onrender.com/citas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(nuevaCita),
-      });
-      if (!resCita.ok) throw new Error('Error al guardar la cita');
-
-      // ✅ Mostrar confirmación
       alert('✅ Tu cita se ha registrado correctamente.');
 
-      // 🔹 Cerrar el modal y forzar actualización visual
       this.zone.run(() => {
         this.cerrarWizard();
         this.cdr.detectChanges();
       });
+
     } catch (err) {
-      console.error('❌ Error al guardar datos en Render:', err);
+      console.error('❌ Error al guardar en Firestore:', err);
       alert('No se pudo guardar la reserva.');
     }
   }

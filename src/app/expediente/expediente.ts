@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FirebaseService } from '../services/firebase.service';
 
 @Component({
   selector: 'app-expediente',
@@ -13,18 +14,24 @@ export class Expediente implements OnInit {
   cita: any;
   cargando = true;
 
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private firebase: FirebaseService
+  ) {}
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
 
     try {
-      const res = await fetch(`https://backend-veterinaria-qedk.onrender.com/mascotas/${id}`);
-      if (!res.ok) throw new Error('Error al cargar expediente');
-      this.cita = await res.json();
+      this.cita = await this.firebase.getMascota(id);
+
+      if (!this.cita) {
+        alert('Expediente no encontrado en Firestore');
+      }
     } catch (error) {
-      console.error('❌ Error al cargar expediente:', error);
+      console.error('❌ Error:', error);
       alert('No se pudo cargar el expediente.');
     } finally {
       this.cargando = false;

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { FirebaseService } from '../services/firebase.service'; // 🟢 IMPORTANTE
 
 @Component({
   selector: 'app-mascotas',
@@ -13,16 +14,15 @@ export class Mascotas implements OnInit {
   searchTerm: string = '';
   mascotas: any[] = [];
   cargando: boolean = true;
-  private apiUrl = 'https://backend-veterinaria-qedk.onrender.com/mascotas';
+
+  constructor(private firebase: FirebaseService) {}
 
   async ngOnInit() {
     try {
-      const res = await fetch(this.apiUrl, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Error al cargar mascotas');
-      const data = await res.json();
-      this.mascotas = data;
+      // 🟢 Cargar mascotas desde Firestore
+      this.mascotas = await this.firebase.getAllMascotas();
     } catch (error) {
-      console.error('⚠️ No se pudo conectar al backend:', error);
+      console.error('⚠️ No se pudo cargar desde Firebase:', error);
     } finally {
       this.cargando = false;
     }

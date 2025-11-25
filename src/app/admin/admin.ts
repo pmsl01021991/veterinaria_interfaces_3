@@ -1,5 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+import {
+  Firestore,
+  collection,
+  collectionData,
+  deleteDoc,
+  doc
+} from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-admin',
@@ -9,36 +17,38 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./admin.css']
 })
 export class Admin implements OnInit {
+
+  private firestore = inject(Firestore);
   citas: any[] = [];
 
   ngOnInit() {
     this.cargarCitas();
   }
 
-  // 🔹 Obtener citas desde Render
-  async cargarCitas() {
-    try {
-      const res = await fetch('https://backend-veterinaria-qedk.onrender.com/citas');
-      if (!res.ok) throw new Error('Error al obtener citas');
-      this.citas = await res.json();
-    } catch (err) {
-      console.error('❌ Error al cargar citas:', err);
-      alert('No se pudieron cargar las citas.');
-    }
+  // ✅ Obtener citas desde Firestore (realtime)
+  cargarCitas() {
+    const citasRef = collection(this.firestore, 'citas');
+
+    collectionData(citasRef, { idField: 'id' }).subscribe({
+      next: (data) => {
+        this.citas = data;
+      },
+      error: (err) => {
+        console.error('❌ Error al cargar citas:', err);
+        alert('No se pudieron cargar las citas.');
+      }
+    });
   }
 
-  // ✅ Eliminar cita tanto local como en Render
+  // 🗑️ Eliminar cita en Firestore
   async eliminarCita(index: number) {
     const cita = this.citas[index];
     if (!cita || !confirm('¿Seguro que deseas eliminar esta cita?')) return;
 
     try {
-      const res = await fetch(`https://backend-veterinaria-qedk.onrender.com/citas/${cita.id}`, {
-        method: 'DELETE'
-      });
+      const citaDoc = doc(this.firestore, `citas/${cita.id}`);
+      await deleteDoc(citaDoc);
 
-      if (!res.ok) throw new Error('Error al eliminar la cita');
-      this.citas.splice(index, 1);
       alert('✅ Cita eliminada correctamente.');
     } catch (err) {
       console.error('❌ Error al eliminar cita:', err);

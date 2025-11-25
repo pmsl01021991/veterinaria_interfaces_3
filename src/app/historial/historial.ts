@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { FirebaseService } from '../services/firebase.service';
 
 @Component({
   selector: 'app-historial',
@@ -17,25 +18,24 @@ export class Historial implements OnInit {
   filtroEstado: string = 'Todos';
   cargando: boolean = true;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private firebase: FirebaseService) {}
 
   async ngOnInit() {
     await this.cargarCitas();
   }
 
-  // 🟢 Cargar citas desde Render
+  // 🟢 Cargar citas desde Firestore
   async cargarCitas() {
     this.cargando = true;
     try {
-      const res = await fetch('https://backend-veterinaria-qedk.onrender.com/mascotas');
-      if (!res.ok) throw new Error('Error al cargar citas');
-      this.citas = await res.json();
+      const data = await this.firebase.getAllMascotas();
 
-      // Si alguna cita no tiene estado, la ponemos como Pendiente
-      this.citas = this.citas.map(c => ({
+      this.citas = data.map((c: any) => ({
         ...c,
+        id: c.id,                     // Usamos el id de Firestore
         estado: c.estado || 'Pendiente'
       }));
+
     } catch (error) {
       console.error('❌ Error al cargar citas:', error);
       alert('Error al cargar las citas');
@@ -79,17 +79,12 @@ export class Historial implements OnInit {
     }
   }
 
-  // 🟢 Cambiar estado y actualizar en Render
+  // 🟢 Cambiar estado en Firestore
   async actualizarEstado(cita: any, nuevoEstado: string) {
     if (!cita.id) return;
-    try {
-      const res = await fetch(`https://backend-veterinaria-qedk.onrender.com/citas/${cita.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ estado: nuevoEstado })
-      });
 
-      if (!res.ok) throw new Error('Error al actualizar cita');
+    try {
+      await this.firebase.updateMascotaEstado(cita.id, nuevoEstado);
 
       cita.estado = nuevoEstado;
       alert(`✅ Estado actualizado a ${nuevoEstado}`);
@@ -99,18 +94,15 @@ export class Historial implements OnInit {
     }
   }
 
-  // 🗑️ Eliminar cita
-  async eliminar(id?: number) {
+  // 🗑️ Eliminar mascota (cita) de Firestore
+  async eliminar(id?: string) {
     if (!id) return;
+
     const confirmar = confirm('¿Seguro que deseas eliminar esta cita?');
     if (!confirmar) return;
 
     try {
-      const res = await fetch(`https://backend-veterinaria-qedk.onrender.com/citas/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (!res.ok) throw new Error('Error al eliminar cita');
+      await this.firebase.deleteMascota(id);
 
       this.citas = this.citas.filter(c => c.id !== id);
       alert('✅ Cita eliminada correctamente');
@@ -120,8 +112,8 @@ export class Historial implements OnInit {
     }
   }
 
-  // 👁️ Nueva función para ver detalles de expediente
-  verDetalle(id: number) {
+  // 👁️ Ver expediente
+  verDetalle(id: string) {
     this.router.navigate(['/expediente', id]);
   }
 }
