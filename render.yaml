@@ -1,8 +1,10 @@
-static:
-  publish: "dist/mi-proyecto01/browser"
-  buildCommand: "npm install && npm run build"
-
-  redirects:
-    - source: "/*"
-      destination: "/index.html"
-      status: 200
+services:
+  - type: web
+    name: mi-proyecto01
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist/mi-proyecto01
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
