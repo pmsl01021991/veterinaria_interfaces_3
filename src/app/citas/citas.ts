@@ -1,16 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import {
-  Firestore,
-  collection,
-  collectionData,
-  addDoc,
-  deleteDoc,
-  updateDoc,
-  doc
-} from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, addDoc, deleteDoc, updateDoc, doc} from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-citas',
@@ -43,14 +34,6 @@ export class Citas implements OnInit {
 
   searchTerm: string = '';
 
-  private iconosPorTipo: Record<string, string> = {
-    perro: 'https://cdn-icons-png.flaticon.com/512/194/194279.png',
-    gato: 'https://cdn-icons-png.flaticon.com/512/1998/1998616.png',
-    ave: 'https://cdn-icons-png.flaticon.com/512/616/616554.png',
-    pez: 'https://cdn-icons-png.flaticon.com/512/616/616430.png',
-    default: 'https://cdn-icons-png.flaticon.com/512/616/616408.png'
-  };
-
   servicios = [
     'consulta general',
     'vacunacion',
@@ -64,6 +47,8 @@ export class Citas implements OnInit {
     await this.cargarCitas();
   }
 
+  constructor(private cdr: ChangeDetectorRef) {} // ← Inyectar
+
   // 🔥 CARGAR MASCOTAS DESDE FIRESTORE
   async cargarCitas() {
     this.cargando = true;
@@ -73,10 +58,12 @@ export class Citas implements OnInit {
         this.citas = data;
         this.citasFiltradas = data;
         this.cargando = false;
+        this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
       });
     } catch (err) {
       console.error(err);
       this.cargando = false;
+      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     }
   }
 
@@ -99,9 +86,13 @@ export class Citas implements OnInit {
       nombre: '',
       telefono: '',
       notas: '',
+      notasAdicionales: '',
       tipo: 'perro',
       raza: '',
-      servicio: this.servicios[0]
+      servicio: this.servicios[0],
+      fecha: '',    // ← AGREGAR
+      hora: '',     // ← AGREGAR
+      edad: ''      // ← AGREGAR
     };
   }
 
@@ -118,20 +109,33 @@ export class Citas implements OnInit {
 
     const tipo = (this.nuevaCita.tipo || 'perro').toLowerCase();
 
+    // 🔥 CORREGIR EL ICONO
+    let icono = '';
+    if (tipo === 'perro') {
+      icono = 'assets/huellitas/Imagenes/perro.png';
+    } else if (tipo === 'gato') {
+      icono = 'assets/huellitas/Imagenes/gato.webp';
+    } else if (tipo === 'ave') {
+      icono = 'assets/huellitas/Imagenes/loro.jpg';  // ← TU IMAGEN
+    } else if (tipo === 'pez') {
+      icono = 'assets/huellitas/Imagenes/pez.jpg';   // ← TU IMAGEN
+    } else {
+      icono = 'assets/huellitas/Imagenes/perro.png';
+    }
+
     const nuevoRegistro = {
       tipo,
-      icono: tipo === 'gato'
-        ? 'assets/huellitas/Imagenes/gato.webp'
-        : 'assets/huellitas/Imagenes/perro.png',
+      icono,
       nombre: this.nuevaCita.nombre,
       raza: this.nuevaCita.raza || '',
       edad: this.nuevaCita.edad ?? '',
       duenio: this.nuevaCita.duenio,
-      telefono: this.nuevaCita.telefono,
-      notas: this.nuevaCita.notas || '',
+      telefono: this.nuevaCita.telefono,  
       servicio: this.nuevaCita.servicio || this.servicios[0],
       fecha: this.nuevaCita.fecha || '',
       hora: this.nuevaCita.hora || '',
+      notas: this.nuevaCita.notas || '',
+      notasAdicionales: this.nuevaCita.notasAdicionales || '',
       estado: 'Pendiente'
     };
 
@@ -161,7 +165,17 @@ export class Citas implements OnInit {
   editarCita(id: string) {
     const cita = this.citas.find(c => c.id === id);
     if (cita) {
-      this.citaEditando = { ...cita };
+      this.citaEditando = { ...cita,
+        notasAdicionales: cita.notasAdicionales || ''
+      };
+
+      if (this.citaEditando.notas && this.citaEditando.notas.includes('| Notas:')) {
+      const partes = this.citaEditando.notas.split('| Notas:');
+      this.citaEditando.notasAdicionales = partes[1]?.trim() || '';
+    } else if (this.citaEditando.notas && !this.citaEditando.notasAdicionales) {
+      // Si no hay notas adicionales separadas, usar el campo notas como respaldo
+      this.citaEditando.notasAdicionales = this.citaEditando.notas;// Limpiar nota duplicada
+      }
     }
   }
 
@@ -170,13 +184,28 @@ export class Citas implements OnInit {
     if (!this.citaEditando) return;
 
     try {
+
+      const datosActualizados = {
+      duenio: this.citaEditando.duenio,
+      nombre: this.citaEditando.nombre,
+      telefono: this.citaEditando.telefono,
+      servicio: this.citaEditando.servicio,
+      fecha: this.citaEditando.fecha,
+      hora: this.citaEditando.hora,
+      notasAdicionales: this.citaEditando.notasAdicionales || '', // ← AGREGAR ESTO
+      tipo: this.citaEditando.tipo,
+      raza: this.citaEditando.raza,
+      edad: this.citaEditando.edad,
+      estado: this.citaEditando.estado || 'Pendiente'
+    };
       await updateDoc(
         doc(this.firestore, 'mascotas', this.citaEditando.id),
-        this.citaEditando
+        datosActualizados
       );
 
       alert('✅ Cita actualizada');
       this.citaEditando = null;
+      this.cdr.detectChanges(); // Forzar actualización
     } catch (err) {
       console.error(err);
       alert('No se pudo actualizar');

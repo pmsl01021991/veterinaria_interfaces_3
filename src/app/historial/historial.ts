@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,7 +18,9 @@ export class Historial implements OnInit {
   filtroEstado: string = 'Todos';
   cargando: boolean = true;
 
-  constructor(private router: Router, private firebase: FirebaseService) {}
+  constructor(private router: Router, private firebase: FirebaseService,
+    private cdr: ChangeDetectorRef  // ← Inyectar
+  ) {}
 
   async ngOnInit() {
     await this.cargarCitas();
@@ -35,12 +37,13 @@ export class Historial implements OnInit {
         id: c.id,                     // Usamos el id de Firestore
         estado: c.estado || 'Pendiente'
       }));
-
+      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     } catch (error) {
       console.error('❌ Error al cargar citas:', error);
       alert('Error al cargar las citas');
     } finally {
       this.cargando = false;
+      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     }
   }
 

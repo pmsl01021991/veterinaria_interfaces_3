@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -21,6 +21,8 @@ export class Admin implements OnInit {
   private firestore = inject(Firestore);
   citas: any[] = [];
 
+  constructor(private cdr: ChangeDetectorRef) {} // ← INYECTAR
+
   ngOnInit() {
     this.cargarCitas();
   }
@@ -32,10 +34,12 @@ export class Admin implements OnInit {
     collectionData(citasRef, { idField: 'id' }).subscribe({
       next: (data) => {
         this.citas = data;
+        this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
       },
       error: (err) => {
         console.error('❌ Error al cargar citas:', err);
         alert('No se pudieron cargar las citas.');
+        this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
       }
     });
   }

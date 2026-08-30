@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FirebaseService } from '../services/firebase.service';
@@ -17,7 +17,8 @@ export class Expediente implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private firebase: FirebaseService
+    private firebase: FirebaseService,
+    private cdr: ChangeDetectorRef  // ← INYECTAR
   ) {}
 
   async ngOnInit() {
@@ -26,6 +27,7 @@ export class Expediente implements OnInit {
 
     try {
       this.cita = await this.firebase.getMascota(id);
+      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
 
       if (!this.cita) {
         alert('Expediente no encontrado en Firestore');
@@ -35,6 +37,7 @@ export class Expediente implements OnInit {
       alert('No se pudo cargar el expediente.');
     } finally {
       this.cargando = false;
+      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     }
   }
 

@@ -98,8 +98,12 @@
         </div>
         <div class="card-body">
           <p><strong>Teléfono:</strong> {{ c.telefono }}</p>
-          <p><strong>Servicio:</strong> {{ c.servicio }}</p>
-          <p><strong>Notas:</strong> {{ c.notas }}</p>
+          <p><strong>Servicio:</strong> {{ c.servicio || 'Sin servicio' }}</p>
+          <p><strong>Fecha:</strong> {{ c.fecha || 'Sin fecha' }}</p>
+          <p><strong>Hora:</strong> {{ c.hora || 'Sin hora' }}</p>
+          <p *ngIf="c.notasAdicionales && c.notasAdicionales.trim() !== ''">
+            <strong>Notas adicionales:</strong> {{ c.notasAdicionales }}
+          </p>
 
           <div class="d-flex justify-content-between mt-3">
             <button class="btn btn-warning btn-sm" (click)="editarCita(c.id)">✏️ Editar</button>
@@ -124,8 +128,21 @@
       <label>Teléfono:</label>
       <input type="text" class="form-control mb-2" [(ngModel)]="citaEditando.telefono" />
 
-      <label>Notas:</label>
-      <textarea class="form-control mb-3" rows="2" [(ngModel)]="citaEditando.notas"></textarea>
+      <label class="fw-bold">Servicio:</label>
+      <select class="form-control mb-2" [(ngModel)]="citaEditando.servicio">
+        <option *ngFor="let s of servicios" [value]="s">{{ s | titlecase }}</option>
+      </select>
+
+      <label class="fw-bold">Fecha:</label>
+      <input type="date" class="form-control mb-2" [(ngModel)]="citaEditando.fecha" [min]="hoy" />
+
+      <!-- HORA -->
+      <label class="fw-bold">Hora:</label>
+      <input type="time" class="form-control mb-2" [(ngModel)]="citaEditando.hora" />
+
+      <!-- Notas (opcional) -->
+      <label class="fw-bold">Notas adicionales:</label>
+      <textarea class="form-control mb-3" rows="2" [(ngModel)]="citaEditando.notasAdicionales" placeholder="Notas adicionales (opcional)"></textarea>
 
       <div class="d-flex justify-content-between">
         <button class="btn btn-success btn-sm" (click)="guardarEdicion()">💾 Guardar</button>

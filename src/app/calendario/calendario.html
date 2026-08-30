@@ -58,6 +58,8 @@
         <option [ngValue]="null" disabled selected>Selecciona tipo…</option>
         <option value="perro">🐶 Perro</option>
         <option value="gato">🐱 Gato</option>
+        <option value="ave">🐦 Ave</option>       
+        <option value="pez">🐟 Pez</option> 
       </select>
 
       <div class="d-flex justify-content-between mt-3">
@@ -175,8 +177,32 @@
       </div>
     </ng-container>
 
-    <!-- PASO 7: Confirmación -->
+    <!-- calendario.html - NUEVO PASO 9: NOTAS ADICIONALES -->
     <ng-container *ngIf="paso === 9">
+      <h5 class="mb-3">⑨ Notas adicionales</h5>
+      
+      <p class="text-muted small">¿Algo que debamos saber sobre tu mascota?</p>
+      
+      <textarea
+        class="form-control"
+        rows="4"
+        placeholder="Ej. Es alérgico a ciertos medicamentos, tiene miedo a los ruidos fuertes, come comida especial..."
+        [(ngModel)]="notasAdicionales"
+      ></textarea>
+
+      <div class="d-flex justify-content-between mt-3">
+        <button class="btn btn-link" (click)="paso = 8">Atrás</button>
+        <button
+          class="btn btn-primary"
+          (click)="continuarConNotas()"
+        >
+          Siguiente
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- PASO 7: Confirmación -->
+    <ng-container *ngIf="paso === 10">
       <h5 class="mb-3">⑦ Confirmación</h5>
 
       <p><strong>📅 Fecha:</strong> {{ fechaISO }}</p>
@@ -188,9 +214,17 @@
       <p><strong> EdadMascota:</strong> {{ edadMascota }}</p>
       <p><strong>👤 Dueño:</strong> {{ nombreDueno }}</p>
       <p><strong>📞 Teléfono:</strong> {{ telefonoDuenio }}</p>
+      <p *ngIf="notasAdicionales && notasAdicionales.trim() !== ''">
+      <strong>📝 Notas adicionales:</strong> {{ notasAdicionales }}
+      </p>
+      
+      <!-- Si NO hay notas adicionales, mostrar un mensaje opcional -->
+      <p *ngIf="!notasAdicionales || notasAdicionales.trim() === ''" class="text-muted">
+        <em>Sin notas adicionales</em>
+      </p>
 
       <div class="d-flex justify-content-between mt-3">
-        <button class="btn btn-link" (click)="paso = 8">Atrás</button>
+        <button class="btn btn-link" (click)="paso = 9">Atrás</button>
         <button class="btn btn-success" (click)="confirmarReserva()">
           Confirmar cita
         </button>
