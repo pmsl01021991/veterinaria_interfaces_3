@@ -64,7 +64,7 @@ mi-proyecto01-integrado-huellitas/
 
 El proyecto está desplegado en Render y se puede acceder desde:
 
-👉 https://veterinaria-interfaces-3.onrender.com
+👉 https://veterinaria-interfaces-3.web.app
 
 ### 1️⃣ Requisitos previos
 Antes de ejecutar la aplicación, asegúrate de tener instalado lo siguiente:

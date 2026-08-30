@@ -33,6 +33,7 @@
     "@angular/cli": "20.3.5",
     "@angular/compiler-cli": "20.3.4",
     "@types/jasmine": "^5.1.12",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vite": "^8.2.2"
   }
 }
