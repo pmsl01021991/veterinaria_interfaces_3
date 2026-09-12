@@ -1,0 +1,377 @@
+<div class="adopcion-form-page">
+
+  <!-- ENCABEZADO -->
+
+  <section class="form-header">
+
+    <div class="header-content">
+
+      <span class="header-icon">❤️</span>
+
+      <h1>Dar en adopción</h1>
+
+      <p>
+        Ayúdanos a encontrar un hogar responsable y lleno de amor
+        para tu mascota.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- FORMULARIO -->
+
+  <section class="form-section">
+
+    <div class="form-card">
+
+      <div class="form-title">
+
+        <h2>🐾 Información de la mascota</h2>
+
+        <p>
+          Completa los datos para que las personas puedan conocer
+          mejor a la mascota que necesita un nuevo hogar.
+        </p>
+
+      </div>
+
+
+      <!-- FOTO -->
+
+      <div class="foto-section">
+
+        <div class="foto-preview">
+
+          <img
+            *ngIf="imagenPreview()"
+            [src]="imagenPreview()"
+            alt="Vista previa de mascota"
+          />
+
+          <div
+            *ngIf="!imagenPreview()"
+            class="foto-placeholder">
+
+            <span>📷</span>
+
+            <p>Foto de la mascota</p>
+
+          </div>
+
+        </div>
+
+
+        <div class="foto-controls">
+
+          <label class="btn-foto">
+
+            📷 Seleccionar foto
+
+            <input
+              type="file"
+              accept="image/*"
+              (change)="seleccionarImagen($event)"
+              hidden
+            />
+
+          </label>
+
+          <small>
+            Agrega una foto clara para que las personas
+            puedan conocerla.
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <!-- DATOS BÁSICOS -->
+
+      <div class="form-grid">
+
+        <div class="form-group">
+
+          <label>
+            Nombre de la mascota *
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="mascota.nombre"
+            placeholder="Ej. Firulais"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Tipo de animal *
+          </label>
+
+          <select [(ngModel)]="mascota.tipo">
+
+            <option value="" disabled>
+              Selecciona un tipo
+            </option>
+
+            <option value="perro">
+              🐶 Perro
+            </option>
+
+            <option value="gato">
+              🐱 Gato
+            </option>
+
+            <option value="ave">
+              🐦 Ave
+            </option>
+
+            <option value="conejo">
+              🐰 Conejo
+            </option>
+
+            <option value="otro">
+              🐾 Otro
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Raza
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="mascota.raza"
+            placeholder="Ej. Labrador"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Edad *
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="mascota.edad"
+            placeholder="Ej. 2 años"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Sexo *
+          </label>
+
+          <select [(ngModel)]="mascota.sexo">
+
+            <option value="" disabled>
+              Selecciona
+            </option>
+
+            <option value="macho">
+              ♂️ Macho
+            </option>
+
+            <option value="hembra">
+              ♀️ Hembra
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Estado de salud *
+          </label>
+
+          <select [(ngModel)]="mascota.salud">
+
+            <option value="" disabled>
+              Selecciona
+            </option>
+
+            <option value="saludable">
+              🟢 Saludable
+            </option>
+
+            <option value="tratamiento">
+              🟡 En tratamiento
+            </option>
+
+            <option value="especial">
+              🔵 Necesita cuidados especiales
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <!-- DESCRIPCIÓN -->
+
+      <div class="form-group full">
+
+        <label>
+          Cuéntanos sobre la mascota *
+        </label>
+
+        <textarea
+          [(ngModel)]="mascota.descripcion"
+          rows="4"
+          placeholder="Cuéntanos cómo es su personalidad, qué le gusta hacer, cómo se comporta, etc.">
+        </textarea>
+
+      </div>
+
+
+      <!-- MOTIVO -->
+
+      <div class="form-group full">
+
+        <label>
+          ¿Por qué se da en adopción? *
+        </label>
+
+        <textarea
+          [(ngModel)]="mascota.motivo"
+          rows="4"
+          placeholder="Cuéntanos brevemente por qué estás buscando un nuevo hogar para la mascota.">
+        </textarea>
+
+      </div>
+
+
+      <!-- CONTACTO -->
+
+      <div class="contact-section">
+
+        <div class="contact-title">
+
+          <span>📞</span>
+
+          <div>
+
+            <h3>Información de contacto</h3>
+
+            <p>
+              Este número será utilizado para contactar al
+              responsable de la mascota.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Número de teléfono *
+          </label>
+
+          <input
+            type="tel"
+            [(ngModel)]="mascota.telefono"
+            placeholder="Ej. 987654321"
+          />
+
+        </div>
+
+        <div class="form-group">
+
+        <label>
+            Correo electrónico *
+        </label>
+
+        <input
+            type="email"
+            [(ngModel)]="mascota.correo"
+            placeholder="Ej. ejemplo@gmail.com"
+        />
+
+        </div>
+
+      </div>
+
+
+      <!-- AVISO -->
+
+      <div class="notice">
+
+        <input
+            type="checkbox"
+            id="aceptaResponsabilidad"
+            [(ngModel)]="mascota.aceptaResponsabilidad"
+        />
+
+        <label for="aceptaResponsabilidad">
+
+            <strong>
+            Confirmo que entiendo mi responsabilidad
+            </strong>
+
+            <span>
+            Al publicar esta mascota me comprometo a proporcionar
+            información verdadera y a participar responsablemente
+            en el proceso de adopción.
+            </span>
+
+        </label>
+
+        </div>
+
+
+      <!-- BOTONES -->
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn-cancelar"
+          (click)="cancelar()">
+
+          Cancelar
+
+        </button>
+
+
+        <button
+            type="button"
+            class="btn-publicar"
+            [disabled]="!mascota.aceptaResponsabilidad"
+            (click)="publicarAdopcion()">
+
+            ❤️ Publicar para adopción
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

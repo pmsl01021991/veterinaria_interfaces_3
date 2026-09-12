@@ -18,6 +18,6 @@ export class Adopcion {
   }
 
   irADarEnAdopcion() {
-    alert('❤️ Próximamente podrás registrar una mascota para darla en adopción.');
+    this.router.navigate(['/adopcion/dar-en-adopcion']);
   }
 }
