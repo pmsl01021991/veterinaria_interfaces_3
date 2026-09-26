@@ -1,16 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  collection,
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc
-} from 'firebase/firestore';
-
+import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc} from 'firebase/firestore';
 import { firebaseConfig } from '../../firebase.config';
 
 @Injectable({ providedIn: 'root' })
@@ -46,6 +36,23 @@ export class FirebaseService {
     await addDoc(ref, data);
   }
 
+  // ⭐ Registrar mascota para adopción
+  async addAdopcion(data: any) {
+    const ref = collection(this.db, 'adopciones');
+    await addDoc(ref, data);
+  }
+
+  // ⭐ Obtener todas las mascotas registradas para adopción
+  async getAdopciones() {
+    const ref = collection(this.db, 'adopciones');
+    const snaps = await getDocs(ref);
+
+    return snaps.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }));
+  }
+
   // ⭐ Actualizar estado de mascota (Pendiente, Confirmada…)
   async updateMascotaEstado(id: string, estado: string) {
     const ref = doc(this.db, 'mascotas', id);
@@ -62,5 +69,5 @@ export class FirebaseService {
   async deleteMascota(id: string) {
     const ref = doc(this.db, 'mascotas', id);
     await deleteDoc(ref);
-  }
+  }  
 }
