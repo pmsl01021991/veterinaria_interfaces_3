@@ -362,6 +362,23 @@
   color: #e2e8f0;
 }
 
+.btn-ver-adopciones {
+  background: #377fb2;
+  color: white;
+  border: none;
+  padding: 16px 28px;
+  border-radius: 30px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-ver-adopciones:hover {
+  background: #286993;
+  transform: translateY(-2px);
+}
+
 
 /* =========================
    RESPONSIVE

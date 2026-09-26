@@ -32,6 +32,13 @@
           ❤️ Dar en adopción
         </button>
 
+        <button
+          *ngIf="esAdministrador"
+          class="btn-ver-adopciones"
+          (click)="irAVerAdopciones()">
+          🐾 Ver adopciones
+        </button>
+
       </div>
 
     </div>

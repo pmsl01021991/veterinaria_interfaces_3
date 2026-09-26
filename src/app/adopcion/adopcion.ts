@@ -11,7 +11,16 @@ import { Router } from '@angular/router';
 })
 export class Adopcion {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+
+  const usuario = JSON.parse(
+    localStorage.getItem('user') || 'null'
+  );
+
+  this.esAdministrador = usuario?.rol === 'admin';
+}
+
+  esAdministrador = false;
 
   irAAdoptar() {
     alert('🐾 Próximamente podrás ver todas las mascotas disponibles para adoptar.');
@@ -19,5 +28,9 @@ export class Adopcion {
 
   irADarEnAdopcion() {
     this.router.navigate(['/adopcion/dar-en-adopcion']);
+  }
+
+  irAVerAdopciones() {
+    this.router.navigate(['/adopciones-admin']);
   }
 }

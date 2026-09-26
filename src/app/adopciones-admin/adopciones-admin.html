@@ -1,0 +1,333 @@
+<section class="adopciones-admin">
+
+  <div class="encabezado">
+
+    <div>
+      <h1>🐾 Mascotas para adopción</h1>
+
+      <p>
+        Revisa las mascotas registradas por los usuarios
+        antes de aprobarlas para su publicación.
+      </p>
+    </div>
+
+    <button
+      class="btn-volver"
+      (click)="volver()">
+      ← Volver
+    </button>
+
+  </div>
+
+
+  <!-- Cargando -->
+  <div
+    class="mensaje"
+    *ngIf="cargando">
+
+    <p>⏳ Cargando solicitudes de adopción...</p>
+
+  </div>
+
+
+  <!-- Sin adopciones -->
+  <div
+    class="mensaje"
+    *ngIf="!cargando && adopciones.length === 0">
+
+    <h3>🐾 No hay solicitudes</h3>
+
+    <p>
+      Actualmente no hay mascotas registradas
+      para revisión.
+    </p>
+
+  </div>
+
+
+  <!-- Lista de adopciones -->
+  <div
+    class="adopciones-grid"
+    *ngIf="!cargando && adopciones.length > 0">
+
+    <article
+      class="adopcion-card"
+      *ngFor="let mascota of adopciones">
+
+
+      <!-- Imagen -->
+      <div class="imagen-container">
+
+        <img
+          *ngIf="mascota.imagenBase64"
+          [src]="mascota.imagenBase64"
+          [alt]="mascota.nombre"
+          class="imagen-mascota"
+        />
+
+        <div
+          *ngIf="!mascota.imagenBase64"
+          class="sin-imagen">
+
+          📷
+          <span>Sin imagen</span>
+
+        </div>
+
+      </div>
+
+
+      <!-- Información -->
+      <div class="informacion">
+
+        <div class="titulo-card">
+
+            <h2>
+                {{ mascota.nombre }}
+            </h2>
+
+            <span
+                class="estado"
+                [class.pendiente]="mascota.estado === 'Pendiente'"
+                [class.aceptada]="mascota.estado === 'Aceptada'"
+                [class.rechazada]="mascota.estado === 'Rechazada'">
+
+                {{ mascota.estado }}
+
+            </span>
+
+            </div>
+
+
+        <div class="datos">
+
+        <!-- MODO NORMAL -->
+        <ng-container *ngIf="editandoId !== mascota.id">
+
+            <p>
+            <strong>🐾 Tipo:</strong>
+            {{ mascota.tipo }}
+            </p>
+
+            <p>
+            <strong>🧬 Raza:</strong>
+            {{ mascota.raza }}
+            </p>
+
+            <p>
+            <strong>🎂 Edad:</strong>
+            {{ mascota.edad }}
+            </p>
+
+            <p>
+            <strong>⚥ Sexo:</strong>
+            {{ mascota.sexo }}
+            </p>
+
+            <p>
+            <strong>❤️ Estado de salud:</strong>
+            {{ mascota.salud }}
+            </p>
+
+        </ng-container>
+
+
+        <!-- MODO EDICIÓN -->
+        <ng-container *ngIf="editandoId === mascota.id">
+
+            <label>Nombre</label>
+            <input
+            type="text"
+            [(ngModel)]="mascotaEditada.nombre"
+            class="form-control"
+            />
+
+            <label>Tipo</label>
+            <input
+            type="text"
+            [(ngModel)]="mascotaEditada.tipo"
+            class="form-control"
+            />
+
+            <label>Raza</label>
+            <input
+            type="text"
+            [(ngModel)]="mascotaEditada.raza"
+            class="form-control"
+            />
+
+            <label>Edad</label>
+            <input
+            type="text"
+            [(ngModel)]="mascotaEditada.edad"
+            class="form-control"
+            />
+
+            <label>Sexo</label>
+            <input
+            type="text"
+            [(ngModel)]="mascotaEditada.sexo"
+            class="form-control"
+            />
+
+            <label>Estado de salud</label>
+            <input
+            type="text"
+            [(ngModel)]="mascotaEditada.salud"
+            class="form-control"
+            />
+
+        </ng-container>
+
+        </div>
+
+
+        <div class="descripcion">
+
+        <h3>Descripción</h3>
+
+        <ng-container *ngIf="editandoId !== mascota.id">
+
+            <p>
+            {{ mascota.descripcion }}
+            </p>
+
+        </ng-container>
+
+        <textarea
+            *ngIf="editandoId === mascota.id"
+            [(ngModel)]="mascotaEditada.descripcion"
+            class="form-control"
+            rows="3">
+        </textarea>
+
+        </div>
+
+
+        <div class="descripcion">
+
+        <h3>Motivo de la adopción</h3>
+
+        <ng-container *ngIf="editandoId !== mascota.id">
+
+            <p>
+            {{ mascota.motivo }}
+            </p>
+
+        </ng-container>
+
+        <textarea
+            *ngIf="editandoId === mascota.id"
+            [(ngModel)]="mascotaEditada.motivo"
+            class="form-control"
+            rows="3">
+        </textarea>
+
+        </div>
+
+
+        <div class="contacto">
+
+        <h3>Datos del propietario</h3>
+
+        <ng-container *ngIf="editandoId !== mascota.id">
+
+            <p>
+            📱 {{ mascota.telefono }}
+            </p>
+
+            <p>
+            ✉️ {{ mascota.correo }}
+            </p>
+
+        </ng-container>
+
+
+        <ng-container *ngIf="editandoId === mascota.id">
+
+            <label>Teléfono</label>
+
+            <input
+            type="text"
+            [(ngModel)]="mascotaEditada.telefono"
+            class="form-control"
+            />
+
+            <label>Correo</label>
+
+            <input
+            type="email"
+            [(ngModel)]="mascotaEditada.correo"
+            class="form-control"
+            />
+
+        </ng-container>
+
+        </div>
+
+
+        <div class="fecha">
+
+          <small>
+            Solicitud registrada:
+            {{ mascota.fechaRegistro?.toDate ?
+               (mascota.fechaRegistro.toDate() | date:'dd/MM/yyyy HH:mm') :
+               'Fecha no disponible' }}
+          </small>
+
+        </div>
+
+      </div>
+
+      <div class="acciones-adopcion">
+
+  <!-- MODO NORMAL -->
+  <ng-container *ngIf="editandoId !== mascota.id">
+
+    <button
+      class="btn-editar"
+      (click)="editarMascota(mascota)">
+      ✏️ Editar
+    </button>
+
+    <button
+      *ngIf="mascota.estado === 'Pendiente'"
+      class="btn-aceptar"
+      (click)="aceptarAdopcion(mascota)">
+      ✅ Aceptar
+    </button>
+
+    <button
+      *ngIf="mascota.estado === 'Pendiente'"
+      class="btn-rechazar"
+      (click)="rechazarAdopcion(mascota)">
+      ❌ Rechazar
+    </button>
+
+  </ng-container>
+
+
+  <!-- MODO EDICIÓN -->
+  <ng-container *ngIf="editandoId === mascota.id">
+
+    <button
+      class="btn-guardar"
+      (click)="guardarEdicion(mascota)">
+      💾 Guardar
+    </button>
+
+    <button
+      class="btn-cancelar"
+      (click)="cancelarEdicion()">
+      Cancelar
+    </button>
+
+  </ng-container>
+
+</div>
+
+    </article>
+
+  </div>
+
+</section>

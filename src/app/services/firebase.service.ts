@@ -53,6 +53,18 @@ export class FirebaseService {
     }));
   }
 
+  // ⭐ Actualizar datos de una mascota en adopción
+  async updateAdopcion(id: string, data: any) {
+    const ref = doc(this.db, 'adopciones', id);
+    await updateDoc(ref, data);
+  }
+
+  // ⭐ Cambiar estado de una adopción
+  async updateAdopcionEstado(id: string, estado: string) {
+    const ref = doc(this.db, 'adopciones', id);
+    await updateDoc(ref, { estado });
+  }
+
   // ⭐ Actualizar estado de mascota (Pendiente, Confirmada…)
   async updateMascotaEstado(id: string, estado: string) {
     const ref = doc(this.db, 'mascotas', id);

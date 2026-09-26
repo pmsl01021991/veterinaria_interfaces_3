@@ -1,0 +1,251 @@
+.adopciones-admin {
+  min-height: 100vh;
+  background: #f5f8fb;
+  padding: 30px 30px 60px;
+}
+
+.encabezado {
+  max-width: 1200px;
+  margin: 0 auto 35px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.encabezado h1 {
+  margin: 0;
+  color: #263b52;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.encabezado p {
+  margin-top: 10px;
+  color: #64748b;
+}
+
+.btn-volver {
+  border: none;
+  background: #377fb2;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-volver:hover {
+  background: #286993;
+}
+
+.mensaje {
+  max-width: 1200px;
+  margin: 40px auto;
+  background: white;
+  padding: 40px;
+  text-align: center;
+  border-radius: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.adopciones-grid {
+  max-width: 1100px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 220px);
+  gap: 15px;
+}
+
+.adopcion-card {
+  width: 300px;
+  min-width: 0;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.imagen-container {
+  width: 100%;
+  height: 280px;
+  background: #e9eef4;
+}
+
+.imagen-mascota {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sin-imagen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #64748b;
+  font-size: 2rem;
+}
+
+.sin-imagen span {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.informacion {
+  padding: 10px;
+}
+
+.titulo-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.titulo-card h2 {
+  margin: 0;
+  color: #263b52;
+  font-size: 1.25rem;
+}
+
+.estado {
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.estado.pendiente {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.datos p,
+.contacto p,
+.descripcion p {
+  margin: 3px 0;
+  color: #475569;
+  font-size: 0.82rem;
+}
+
+.descripcion,
+.contacto {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.descripcion h3,
+.contacto h3 {
+  margin-bottom: 3px;
+  color: #334155;
+  font-size: 0.82rem;
+}
+
+.fecha {
+  margin-top: 10px;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.estado.aceptada {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.estado.rechazada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.acciones-adopcion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 10px 10px;
+}
+
+.acciones-adopcion button {
+  border: none;
+  padding: 6px 8px;
+  border-radius: 7px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.7rem;
+}
+
+.btn-editar {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.btn-aceptar {
+  background: #22c55e;
+  color: white;
+}
+
+.btn-rechazar {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-guardar {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-cancelar {
+  background: #64748b;
+  color: white;
+}
+
+.acciones-adopcion button:hover {
+  opacity: 0.85;
+}
+
+.datos label,
+.contacto label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+@media (max-width: 1050px) {
+
+  .adopciones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 800px) {
+
+  .adopciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .adopciones-admin {
+    padding: 100px 15px 40px;
+  }
+
+  .encabezado h1 {
+    font-size: 1.7rem;
+  }
+
+}

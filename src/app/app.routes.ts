@@ -8,6 +8,7 @@ import { Historial } from './historial/historial';
 import { Expediente } from './expediente/expediente';
 import { Adopcion } from './adopcion/adopcion';
 import { DarEnAdopcion } from './adopcion/dar-en-adopcion/dar-en-adopcion';
+import { AdopcionesAdmin } from './adopciones-admin/adopciones-admin';
 
 export const routes: Routes = [
   { path: '', component: Home },                         // Página principal
@@ -30,6 +31,8 @@ export const routes: Routes = [
   
   // 🔹 Nueva ruta para el panel del administrador
   { path: 'admin', component: Admin },
+
+  { path: 'adopciones-admin', component: AdopcionesAdmin },
 
   // Nueva ruta para el calendario de citas
   { path: 'calendario', component: Calendario },
