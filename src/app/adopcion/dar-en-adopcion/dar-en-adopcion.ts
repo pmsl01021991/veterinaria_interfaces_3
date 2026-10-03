@@ -75,6 +75,15 @@ export class DarEnAdopcion {
       return;
     }
 
+    const usuario = JSON.parse(
+      localStorage.getItem('user') || 'null'
+    );
+
+    const usuarioRegistro =
+      usuario?.username ||
+      usuario?.email ||
+      '';
+
     try {
 
       let imagenBase64: string | null = null;
@@ -99,7 +108,8 @@ export class DarEnAdopcion {
         motivo: this.mascota.motivo,
         telefono: this.mascota.telefono,
         correo: this.mascota.correo,
-
+        usuarioRegistro: usuarioRegistro,
+        
         // Imagen convertida a Base64
         imagenBase64: imagenBase64,
 

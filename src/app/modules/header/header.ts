@@ -32,6 +32,10 @@ export class Header implements OnInit {
   ngOnInit(): void {
     this.cargarUsuario();
 
+    window.addEventListener('abrir-auth', () => {
+      this.abrirAuth();
+    });
+
     // Cierra menú y sube al inicio en cada navegación real
     this.router.events
       .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))

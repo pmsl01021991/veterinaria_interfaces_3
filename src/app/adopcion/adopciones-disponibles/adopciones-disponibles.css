@@ -1,0 +1,198 @@
+.adopciones-disponibles {
+  min-height: 100vh;
+  background: #f5f8fb;
+  padding: 30px 30px 60px;
+}
+
+.encabezado {
+  max-width: 1200px;
+  margin: 0 auto 35px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.encabezado h1 {
+  margin: 0;
+  color: #263b52;
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.encabezado p {
+  margin-top: 10px;
+  color: #64748b;
+}
+
+.btn-volver {
+  border: none;
+  background: #377fb2;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-volver:hover {
+  background: #286993;
+}
+
+.mensaje {
+  max-width: 900px;
+  margin: 40px auto;
+  background: white;
+  padding: 40px;
+  text-align: center;
+  border-radius: 18px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.adopciones-grid {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.adopcion-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.imagen-container {
+  width: 100%;
+  height: 280px;
+  background: #e9eef4;
+}
+
+.imagen-mascota {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sin-imagen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #64748b;
+  font-size: 2rem;
+}
+
+.sin-imagen span {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.informacion {
+  padding: 18px;
+}
+
+.titulo-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.titulo-card h2 {
+  margin: 0;
+  color: #263b52;
+  font-size: 1.4rem;
+}
+
+.estado {
+  background: #dcfce7;
+  color: #166534;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.datos p,
+.descripcion p,
+.propietario-registro p {
+  margin: 6px 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.descripcion {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.descripcion h3 {
+  margin: 0 0 6px;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.propietario-registro {
+  margin-top: 15px;
+  padding: 10px;
+  background: #eff6ff;
+  border-radius: 10px;
+}
+
+.propietario-registro p {
+  margin: 0;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.acciones-adopcion {
+  padding: 0 18px 18px;
+}
+
+.btn-adoptar {
+  width: 100%;
+  border: none;
+  padding: 11px;
+  border-radius: 10px;
+  background: #22c55e;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-adoptar:hover {
+  background: #16a34a;
+}
+
+@media (max-width: 1000px) {
+  .adopciones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .adopciones-disponibles {
+    padding: 100px 15px 40px;
+  }
+
+  .adopciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .encabezado h1 {
+    font-size: 1.7rem;
+  }
+}

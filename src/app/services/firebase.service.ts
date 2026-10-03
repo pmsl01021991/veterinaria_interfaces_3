@@ -43,7 +43,7 @@ export class FirebaseService {
   }
 
   // ⭐ Obtener todas las mascotas registradas para adopción
-  async getAdopciones() {
+  async getAdopciones(): Promise<any[]>{
     const ref = collection(this.db, 'adopciones');
     const snaps = await getDocs(ref);
 

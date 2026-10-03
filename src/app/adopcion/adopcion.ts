@@ -23,8 +23,8 @@ export class Adopcion {
   esAdministrador = false;
 
   irAAdoptar() {
-    alert('🐾 Próximamente podrás ver todas las mascotas disponibles para adoptar.');
-  }
+  this.router.navigate(['/adopcion/disponibles']);
+}
 
   irADarEnAdopcion() {
     this.router.navigate(['/adopcion/dar-en-adopcion']);

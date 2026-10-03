@@ -6,9 +6,11 @@ import { Admin } from './admin/admin';
 import {Citas} from './citas/citas'
 import { Historial } from './historial/historial';
 import { Expediente } from './expediente/expediente';
+import { authGuard } from './guards/auth.guard';
 import { Adopcion } from './adopcion/adopcion';
 import { DarEnAdopcion } from './adopcion/dar-en-adopcion/dar-en-adopcion';
 import { AdopcionesAdmin } from './adopciones-admin/adopciones-admin';
+import { AdopcionesDisponibles } from './adopcion/adopciones-disponibles/adopciones-disponibles';
 
 export const routes: Routes = [
   { path: '', component: Home },                         // Página principal
@@ -22,11 +24,22 @@ export const routes: Routes = [
 
   { path: 'expediente/:id', component: Expediente },
   
-  { path: 'adopcion', component: Adopcion },
+  { 
+    path: 'adopcion',
+    component: Adopcion,
+    canActivate: [authGuard]
+  },
 
-  {
+  { 
+    path: 'adopcion/disponibles',
+    component: AdopcionesDisponibles,
+    canActivate: [authGuard]
+  },
+
+  { 
     path: 'adopcion/dar-en-adopcion',
-    component: DarEnAdopcion
+    component: DarEnAdopcion,
+    canActivate: [authGuard]
   },
   
   // 🔹 Nueva ruta para el panel del administrador

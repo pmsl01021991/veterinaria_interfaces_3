@@ -1,0 +1,131 @@
+<section class="adopciones-disponibles">
+
+  <div class="encabezado">
+    <div>
+      <h1>🐾 Mascotas disponibles para adopción</h1>
+      <p>Encuentra una mascota que está esperando una nueva familia.</p>
+    </div>
+
+    <button class="btn-volver">
+      ← Volver
+    </button>
+  </div>
+
+  <!-- Cargando -->
+  <div class="mensaje" *ngIf="cargando">
+    <p>🐾 Cargando mascotas disponibles...</p>
+  </div>
+
+  <!-- Sin mascotas -->
+  <div
+    class="mensaje"
+    *ngIf="!cargando && adopciones.length === 0"
+  >
+    <p>🐶 Por el momento no hay mascotas disponibles para adopción.</p>
+  </div>
+
+  <!-- Mascotas -->
+  <div
+    class="adopciones-grid"
+    *ngIf="!cargando && adopciones.length > 0"
+  >
+
+    <div
+      class="adopcion-card"
+      *ngFor="let mascota of adopciones"
+    >
+
+      <!-- Imagen -->
+      <div class="imagen-container">
+
+        <img
+          *ngIf="mascota.imagenBase64"
+          [src]="mascota.imagenBase64"
+          [alt]="mascota.nombre"
+          class="imagen-mascota"
+        >
+
+        <div
+          class="sin-imagen"
+          *ngIf="!mascota.imagenBase64"
+        >
+          🐾
+          <span>Sin imagen</span>
+        </div>
+
+      </div>
+
+      <!-- Información -->
+      <div class="informacion">
+
+        <div class="titulo-card">
+          <h2>{{ mascota.nombre }}</h2>
+
+          <span class="estado">
+            Disponible
+          </span>
+        </div>
+
+        <div class="datos">
+
+          <p>
+            <strong>🐾 Tipo:</strong>
+            {{ mascota.tipo }}
+          </p>
+
+          <p>
+            <strong>🧬 Raza:</strong>
+            {{ mascota.raza }}
+          </p>
+
+          <p>
+            <strong>🎂 Edad:</strong>
+            {{ mascota.edad }}
+          </p>
+
+          <p>
+            <strong>⚥ Sexo:</strong>
+            {{ mascota.sexo }}
+          </p>
+
+          <p>
+            <strong>❤️ Salud:</strong>
+            {{ mascota.salud }}
+          </p>
+
+        </div>
+
+        <div class="descripcion">
+          <h3>Descripción</h3>
+          <p>{{ mascota.descripcion }}</p>
+        </div>
+
+        <!-- Usuario que registró la mascota -->
+        <div
+          class="propietario-registro"
+          *ngIf="mascota.usuarioRegistro === usuarioActual"
+        >
+          <p>
+            📝 Tú registraste esta mascota.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Acción -->
+      <div class="acciones-adopcion">
+
+        <button
+          class="btn-adoptar"
+          *ngIf="mascota.usuarioRegistro !== usuarioActual"
+        >
+          🐾 Adoptar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
