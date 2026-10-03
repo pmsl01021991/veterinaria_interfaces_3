@@ -62,6 +62,69 @@ export class DarEnAdopcion {
 
   async publicarAdopcion() {
 
+    const camposFaltantes: string[] = [];
+
+    if (!this.mascota.nombre.trim()) {
+      camposFaltantes.push('Nombre de la mascota');
+    }
+
+    if (!this.mascota.tipo.trim()) {
+      camposFaltantes.push('Tipo de mascota');
+    }
+
+    if (!this.mascota.raza.trim()) {
+      camposFaltantes.push('Raza');
+    }
+
+    if (!this.mascota.edad.trim()) {
+      camposFaltantes.push('Edad');
+    }
+
+    if (!this.mascota.sexo.trim()) {
+      camposFaltantes.push('Sexo');
+    }
+
+    if (!this.mascota.salud.trim()) {
+      camposFaltantes.push('Estado de salud');
+    }
+
+    if (!this.mascota.descripcion.trim()) {
+      camposFaltantes.push('Descripción');
+    }
+
+    if (!this.mascota.motivo.trim()) {
+      camposFaltantes.push('Motivo de adopción');
+    }
+
+    if (!this.mascota.telefono.trim()) {
+      camposFaltantes.push('Número de teléfono');
+    }
+
+    if (!this.mascota.correo.trim()) {
+      camposFaltantes.push('Correo electrónico');
+    }
+
+    if (!this.archivoImagen) {
+      camposFaltantes.push('Imagen de la mascota');
+    }
+
+    if (camposFaltantes.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Completa todos los campos',
+        html: `
+          <p>Antes de publicar debes completar:</p>
+          <ul style="text-align: left;">
+            ${camposFaltantes.map(campo => `<li>${campo}</li>`).join('')}
+          </ul>
+        `,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: '#377fb2'
+      });
+
+      return;
+    }
+
     if (!this.mascota.aceptaResponsabilidad) {
 
       Swal.fire({
@@ -109,7 +172,7 @@ export class DarEnAdopcion {
         telefono: this.mascota.telefono,
         correo: this.mascota.correo,
         usuarioRegistro: usuarioRegistro,
-        
+
         // Imagen convertida a Base64
         imagenBase64: imagenBase64,
 
