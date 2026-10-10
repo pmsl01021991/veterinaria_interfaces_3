@@ -99,6 +99,7 @@
         <div class="card-body">
           <p><strong>Teléfono:</strong> {{ c.telefono }}</p>
           <p><strong>Servicio:</strong> {{ c.servicio || 'Sin servicio' }}</p>
+          <p><strong>Tipo:</strong> {{ c.tipo ? (c.tipo | titlecase) : 'Sin tipo' }}</p>
           <p><strong>Fecha:</strong> {{ c.fecha || 'Sin fecha' }}</p>
           <p><strong>Hora:</strong> {{ c.hora || 'Sin hora' }}</p>
           <p *ngIf="c.notasAdicionales && c.notasAdicionales.trim() !== ''">
