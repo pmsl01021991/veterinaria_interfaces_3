@@ -220,8 +220,7 @@ horaBloqueada(
       notasAdicionales: this.nuevaCita.notasAdicionales || '',
       estado: 'Pendiente'
     };
-
-    
+  
     await this.cargarHorasOcupadas(this.nuevaCita.fecha);
 
     if (

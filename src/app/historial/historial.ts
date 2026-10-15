@@ -97,6 +97,7 @@ export class Historial implements OnInit {
     }
   }
 
+  
   // 🗑️ Eliminar mascota (cita) de Firestore
   async eliminar(id?: string) {
     if (!id) return;
@@ -107,13 +108,17 @@ export class Historial implements OnInit {
     try {
       await this.firebase.deleteMascota(id);
 
+      // Actualizar la tabla inmediatamente
       this.citas = this.citas.filter(c => c.id !== id);
+      this.cdr.detectChanges();
+
       alert('✅ Cita eliminada correctamente');
     } catch (error) {
       console.error('❌ Error al eliminar cita:', error);
       alert('Error al eliminar la cita');
     }
   }
+
 
   // 👁️ Ver expediente
   verDetalle(id: string) {
