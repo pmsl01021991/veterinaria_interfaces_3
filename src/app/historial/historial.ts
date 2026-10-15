@@ -1,8 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-historial',
@@ -11,19 +12,38 @@ import { FirebaseService } from '../services/firebase.service';
   templateUrl: './historial.html',
   styleUrls: ['./historial.css']
 })
-export class Historial implements OnInit {
+export class Historial implements OnInit, OnDestroy {
   citas: any[] = [];
   filtro: string = '';
   fechaFiltro: string = '';
   filtroEstado: string = 'Todos';
   cargando: boolean = true;
+  private dejarDeEscuchar?: () => void;
 
   constructor(private router: Router, private firebase: FirebaseService,
     private cdr: ChangeDetectorRef  // ← Inyectar
   ) {}
 
-  async ngOnInit() {
-    await this.cargarCitas();
+  ngOnInit() {
+    this.cargando = true;
+
+    this.dejarDeEscuchar = this.firebase.escucharMascotas((data) => {
+      this.citas = data.map((c: any) => ({
+        ...c,
+        estado: c.estado || 'Pendiente'
+      }));
+
+      this.citas.sort((a, b) =>
+        (a.fecha || '').localeCompare(b.fecha || '')
+      );
+
+      this.cargando = false;
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy() {
+    this.dejarDeEscuchar?.();
   }
 
   // 🟢 Cargar citas desde Firestore

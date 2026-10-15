@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc} from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 import { firebaseConfig } from '../../firebase.config';
 
 @Injectable({ providedIn: 'root' })
@@ -29,6 +29,28 @@ export class FirebaseService {
       ...d.data()
     }));
   }
+
+  
+  // 🔴 Escuchar cambios en tiempo real de las mascotas y citas
+  escucharMascotas(callback: (mascotas: any[]) => void) {
+    const ref = collection(this.db, 'mascotas');
+
+    return onSnapshot(
+      ref,
+      (snaps) => {
+        const mascotas = snaps.docs.map(d => ({
+          id: d.id,
+          ...d.data()
+        }));
+
+        callback(mascotas);
+      },
+      (error) => {
+        console.error('Error al escuchar cambios en mascotas:', error);
+      }
+    );
+  }
+
 
   // ⭐ Crear una nueva mascota / cita
   async addMascota(data: any) {
