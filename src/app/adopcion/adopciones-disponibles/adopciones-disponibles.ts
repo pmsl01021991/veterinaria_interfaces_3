@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FirebaseService } from '../../services/firebase.service';
 
@@ -17,7 +18,8 @@ export class AdopcionesDisponibles implements OnInit {
 
   constructor(
     private firebase: FirebaseService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -63,5 +65,9 @@ export class AdopcionesDisponibles implements OnInit {
       this.cdr.detectChanges();
     }
   }
+
+  volver(): void {
+  this.router.navigate(['/adopcion']);
+}
 
 }
