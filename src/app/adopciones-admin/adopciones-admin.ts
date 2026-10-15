@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
@@ -11,12 +11,13 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './adopciones-admin.html',
   styleUrl: './adopciones-admin.css'
 })
-export class AdopcionesAdmin implements OnInit {
+export class AdopcionesAdmin implements OnInit, OnDestroy {
 
   adopciones: any[] = [];
   cargando = true;
   editandoId: string | null = null;
   mascotaEditada: any = null;
+  private cancelarEscucha?: () => void;
 
   constructor(
     private firebase: FirebaseService,
@@ -24,9 +25,8 @@ export class AdopcionesAdmin implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+  
   ngOnInit(): void {
-
-    // Verificar que sea administrador
     const usuario = JSON.parse(
       localStorage.getItem('user') || 'null'
     );
@@ -36,40 +36,21 @@ export class AdopcionesAdmin implements OnInit {
       return;
     }
 
-    this.cargarAdopciones();
-  }
+    this.cargando = true;
 
-  async cargarAdopciones() {
-
-    try {
-
-      this.cargando = true;
-
-      this.adopciones =
-        await this.firebase.getAdopciones();
-
-         // Actualizar la interfaz inmediatamente
+    this.cancelarEscucha = this.firebase.escucharAdopciones(
+      (adopciones) => {
+        this.adopciones = adopciones;
+        this.cargando = false;
         this.cdr.detectChanges();
-
-    } catch (error) {
-
-      console.error(
-        '❌ Error cargando adopciones:',
-        error
-      );
-
-      alert(
-        'No se pudieron cargar las mascotas para adopción.'
-      );
-
-    } finally {
-
-      this.cargando = false;
-
-      // Actualizar la interfaz después de terminar la carga
-      this.cdr.detectChanges();
-    }
+      }
+    );
   }
+
+  ngOnDestroy(): void {
+    this.cancelarEscucha?.();
+  }
+
 
   editarMascota(mascota: any) {
 

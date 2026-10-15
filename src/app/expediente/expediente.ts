@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FirebaseService } from '../services/firebase.service';
@@ -10,9 +10,10 @@ import { FirebaseService } from '../services/firebase.service';
   templateUrl: './expediente.html',
   styleUrls: ['./expediente.css']
 })
-export class Expediente implements OnInit {
+export class Expediente implements OnInit, OnDestroy {
   cita: any;
   cargando = true;
+  private dejarDeEscuchar?: () => void;
 
   constructor(
     private route: ActivatedRoute,
@@ -21,27 +22,35 @@ export class Expediente implements OnInit {
     private cdr: ChangeDetectorRef  // ← INYECTAR
   ) {}
 
-  async ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) return;
+  
+ngOnInit() {
+  const id = this.route.snapshot.paramMap.get('id');
 
-    try {
-      this.cita = await this.firebase.getMascota(id);
-      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
+  if (!id) {
+    this.cargando = false;
+    return;
+  }
 
-      if (!this.cita) {
+  this.dejarDeEscuchar = this.firebase.escucharMascota(
+    id,
+    (data) => {
+      this.cita = data;
+      this.cargando = false;
+      this.cdr.detectChanges();
+
+      if (!data) {
         alert('Expediente no encontrado en Firestore');
       }
-    } catch (error) {
-      console.error('❌ Error:', error);
-      alert('No se pudo cargar el expediente.');
-    } finally {
-      this.cargando = false;
-      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     }
-  }
+  );
+}
 
-  volver() {
-    this.router.navigate(['/historial']);
-  }
+ngOnDestroy() {
+  this.dejarDeEscuchar?.();
+}
+
+volver() {
+  this.router.navigate(['/historial']);
+}
+
 }

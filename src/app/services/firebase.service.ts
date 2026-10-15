@@ -19,6 +19,34 @@ export class FirebaseService {
     return { id: snap.id, ...snap.data() };
   }
 
+  
+  // Escuchar un expediente específico en tiempo real
+  escucharMascota(
+    id: string,
+    callback: (mascota: any | null) => void
+  ) {
+    const ref = doc(this.db, 'mascotas', id);
+
+    return onSnapshot(
+      ref,
+      (snap) => {
+        if (!snap.exists()) {
+          callback(null);
+          return;
+        }
+
+        callback({
+          id: snap.id,
+          ...snap.data()
+        });
+      },
+      (error) => {
+        console.error('Error al escuchar el expediente:', error);
+      }
+    );
+  }
+
+
   // ⭐ Obtener todas las mascotas (para historial)
   async getAllMascotas() {
     const ref = collection(this.db, 'mascotas');
@@ -74,6 +102,27 @@ export class FirebaseService {
       ...d.data()
     }));
   }
+
+  
+  escucharAdopciones(callback: (adopciones: any[]) => void) {
+    const ref = collection(this.db, 'adopciones');
+
+    return onSnapshot(
+      ref,
+      (snapshot) => {
+        const adopciones = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+        }));
+
+        callback(adopciones);
+      },
+      (error) => {
+        console.error('Error al escuchar cambios en adopciones:', error);
+      }
+    );
+  }
+
 
   // ⭐ Actualizar datos de una mascota en adopción
   async updateAdopcion(id: string, data: any) {
