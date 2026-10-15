@@ -50,14 +50,25 @@
           <label class="form-label">Fecha:</label>
           <input
             type="date"
-            class="form-control"
             [(ngModel)]="nuevaCita.fecha"
             [min]="hoy"
-          />
+            (ngModelChange)="cargarHorasOcupadas($event)"
+            required
+          >
         </div>
         <div class="col-md-6 mb-2">
           <label class="form-label">Hora:</label>
-          <input type="time" class="form-control" [(ngModel)]="nuevaCita.hora" />
+          <select [(ngModel)]="nuevaCita.hora" required>
+          <option value="">Selecciona una hora</option>
+
+          <option
+            *ngFor="let hora of horariosDisponibles"
+            [value]="hora"
+            [disabled]="horaBloqueada(hora)"
+          >
+            {{ hora }}{{ horaBloqueada(hora) ? ' (No disponible)' : '' }}
+          </option>
+        </select>
         </div>
       </div>
 
@@ -80,8 +91,6 @@
       </div>
     </div>
   </div>
-
-
 
   <!-- spinner -->
   <div *ngIf="cargando" class="text-center text-muted">
@@ -135,11 +144,32 @@
       </select>
 
       <label class="fw-bold">Fecha:</label>
-      <input type="date" class="form-control mb-2" [(ngModel)]="citaEditando.fecha" [min]="hoy" />
+      <input
+        type="date"
+        class="form-control mb-2"
+        [(ngModel)]="citaEditando.fecha"
+        [min]="hoy"
+        (ngModelChange)="cargarHorasOcupadas($event, citaEditando.id)"
+        required
+      />
 
       <!-- HORA -->
       <label class="fw-bold">Hora:</label>
-      <input type="time" class="form-control mb-2" [(ngModel)]="citaEditando.hora" />
+      <select
+        class="form-control mb-2"
+        [(ngModel)]="citaEditando.hora"
+        required
+      >
+        <option value="">Selecciona una hora</option>
+
+        <option
+          *ngFor="let hora of horariosDisponibles"
+          [value]="hora"
+          [disabled]="horaBloqueada(hora, citaEditando.fecha, citaEditando.id)"
+        >
+          {{ hora }}{{ horaBloqueada(hora, citaEditando.fecha, citaEditando.id) ? ' (No disponible)' : '' }}
+        </option>
+      </select>
 
       <!-- Notas (opcional) -->
       <label class="fw-bold">Notas adicionales:</label>

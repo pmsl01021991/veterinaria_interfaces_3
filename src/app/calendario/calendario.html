@@ -33,10 +33,21 @@
     <ng-container *ngIf="paso === 2">
       <h5 class="mb-3">② Selecciona una hora</h5>
 
+      
       <select class="form-select" [(ngModel)]="horaSeleccionada">
-        <option [ngValue]="null" disabled selected>Selecciona…</option>
-        <option *ngFor="let h of horas" [value]="h">{{ h }}</option>
+        <option [ngValue]="null" disabled selected>
+          Selecciona…
+        </option>
+
+        <option
+          *ngFor="let h of horas"
+          [value]="h"
+          [disabled]="horaOcupada(h)"
+          [class.hora-ocupada]="horaOcupada(h)">
+          {{ h }}{{ horaOcupada(h) ? ' (No disponible)' : '' }}
+        </option>
       </select>
+
 
       <div class="d-flex justify-content-between mt-3">
         <button class="btn btn-link" (click)="paso = 1">Atrás</button>

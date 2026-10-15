@@ -26,6 +26,8 @@ export class Calendario {
   servicioSeleccionado: ServicioVeterinario | null = null;
 
   horas: string[] = [];
+  horasOcupadas: string[] = [];
+  
   horaSeleccionada: string | null = null;
   tipoMascota: string = '';
   nombreMascota: string = '';
@@ -34,15 +36,42 @@ export class Calendario {
   nombreDueno: string = '';
   telefonoDuenio: string = '';
   notasAdicionales: string = '';
-
   nombreServicioSeleccionado: string = '';
-
+  
   calendarOptions: any = {
     plugins: [dayGridPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
     selectable: false,
-    dateClick: (arg: { date: Date; dateStr: string }) => this.onDateClick(arg),
+    dateClick: (arg: { date: Date; dateStr: string }) =>
+      this.onDateClick(arg),
   };
+
+horaOcupada(hora: string): boolean {
+  if (this.horasOcupadas.includes(hora)) {
+    return true;
+  }
+
+  if (this.fechaISO === this.obtenerFechaLocal()) {
+    const ahora = new Date();
+    const horaActual =
+      `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+
+    return hora <= horaActual;
+  }
+
+  return false;
+}
+
+
+obtenerFechaLocal(): string {
+  const fecha = new Date();
+  const anio = fecha.getFullYear();
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const dia = String(fecha.getDate()).padStart(2, '0');
+
+  return `${anio}-${mes}-${dia}`;
+}
+
 
   constructor(
     private reservasSrv: ReservasService,
@@ -104,10 +133,19 @@ export class Calendario {
   async continuarConServicio() {
     if (!this.servicioSeleccionado || !this.fechaISO) return;
 
-    this.horas = await this.reservasSrv.getHorasDisponibles(
-      this.fechaISO!,
-      this.servicioSeleccionado?.id ?? 0
-    );
+    this.horas = [
+      '09:00',
+      '10:00',
+      '11:00',
+      '12:00',
+      '14:00',
+      '15:00',
+      '16:00'
+    ];
+
+this.horasOcupadas = await this.reservasSrv.getHorasOcupadas(
+  this.fechaISO!
+);
 
     this.nombreServicioSeleccionado = this.servicioSeleccionado.nombre;
     this.horaSeleccionada = null;
@@ -211,6 +249,35 @@ export class Calendario {
       telefono: this.telefonoDuenio,
       notasAdicionales: this.notasAdicionales
     };
+
+       
+    const horasOcupadasActuales =
+      await this.reservasSrv.getHorasOcupadas(this.fechaISO);
+
+    this.horasOcupadas = horasOcupadasActuales;
+
+    const ahora = new Date();
+    const horaActual =
+      `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+
+    const esFechaHoy = this.fechaISO === this.obtenerFechaLocal();
+    const horaYaPaso = esFechaHoy && this.horaSeleccionada <= horaActual;
+    const horaYaReservada =
+      horasOcupadasActuales.includes(this.horaSeleccionada);
+
+    if (horaYaPaso || horaYaReservada) {
+      alert(
+        horaYaPaso
+          ? 'No puedes reservar una hora que ya pasó.'
+          : 'Esta hora ya está reservada. Selecciona otra.'
+      );
+
+      this.horaSeleccionada = null;
+      this.paso = 2;
+      this.cdr.detectChanges();
+      return;
+    }
+
 
     try {
       // 🔥 Guardar mascota en Firestore

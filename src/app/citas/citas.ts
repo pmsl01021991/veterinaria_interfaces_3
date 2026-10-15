@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Firestore, collection, collectionData, addDoc, deleteDoc, updateDoc, doc} from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, addDoc, deleteDoc, updateDoc, doc, getDocs, query, where} from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-citas',
@@ -14,7 +14,16 @@ export class Citas implements OnInit {
 
   private firestore = inject(Firestore);
 
-  hoy: string = new Date().toISOString().split('T')[0];
+  hoy: string = this.obtenerFechaLocal();
+
+  obtenerFechaLocal(): string {
+    const fecha = new Date();
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+
+    return `${anio}-${mes}-${dia}`;
+  }
   citas: any[] = [];
   citasFiltradas: any[] = [];
   cargando = true;
@@ -48,6 +57,73 @@ export class Citas implements OnInit {
   }
 
   constructor(private cdr: ChangeDetectorRef) {} // ← Inyectar
+
+  horariosDisponibles: string[] = [
+  '09:00',
+  '10:00',
+  '11:00',
+  '12:00',
+  '14:00',
+  '15:00',
+  '16:00'
+];
+
+horasOcupadas: string[] = [];
+
+async cargarHorasOcupadas(fecha: string, idExcluir?: string): Promise<void> {
+  this.horasOcupadas = [];
+
+  if (!fecha) return;
+
+  const consulta = query(
+    collection(this.firestore, 'mascotas'),
+    where('fecha', '==', fecha)
+  );
+
+  const resultado = await getDocs(consulta);
+
+  this.horasOcupadas = resultado.docs
+    .filter(doc => {
+      const datos = doc.data();
+      const estado = String(datos['estado'] || '').toLowerCase();
+
+      return doc.id !== idExcluir &&
+        estado !== 'cancelada' &&
+        estado !== 'cancelado';
+    })
+    .map(doc => String(doc.data()['hora'] || ''))
+    .filter(hora => hora !== '');
+}
+
+horaBloqueada(
+  hora: string,
+  fecha: string = this.nuevaCita.fecha,
+  idExcluir?: string
+): boolean {
+  const esHoraActualDeLaCita = this.citas.some(c =>
+    c.id === idExcluir &&
+    c.fecha === fecha &&
+    c.hora === hora
+  );
+
+  if (esHoraActualDeLaCita) {
+    return false;
+  }
+
+  if (this.horasOcupadas.includes(hora)) {
+    return true;
+  }
+
+  if (fecha === this.obtenerFechaLocal()) {
+    const ahora = new Date();
+    const horaActual =
+      `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+
+    return hora <= horaActual;
+  }
+
+  return false;
+}
 
   // 🔥 CARGAR MASCOTAS DESDE FIRESTORE
   async cargarCitas() {
@@ -102,8 +178,14 @@ export class Citas implements OnInit {
 
   // 🔥 AGREGAR CITA A FIRESTORE
   async agregarCita() {
-    if (!this.nuevaCita.duenio || !this.nuevaCita.nombre || !this.nuevaCita.telefono) {
-      alert('Completa dueño, mascota y teléfono.');
+    if (
+      !this.nuevaCita.duenio ||
+      !this.nuevaCita.nombre ||
+      !this.nuevaCita.telefono ||
+      !this.nuevaCita.fecha ||
+      !this.nuevaCita.hora
+    ) {
+      alert('Completa dueño, mascota, teléfono, fecha y hora.');
       return;
     }
 
@@ -138,6 +220,19 @@ export class Citas implements OnInit {
       notasAdicionales: this.nuevaCita.notasAdicionales || '',
       estado: 'Pendiente'
     };
+
+    
+    await this.cargarHorasOcupadas(this.nuevaCita.fecha);
+
+    if (
+      this.horaBloqueada(
+        this.nuevaCita.hora,
+        this.nuevaCita.fecha
+      )
+    ) {
+      alert('Ese horario ya pasó o no está disponible. Selecciona otra hora.');
+      return;
+    }
 
     try {
       await addDoc(collection(this.firestore, 'mascotas'), nuevoRegistro);
@@ -182,6 +277,33 @@ export class Citas implements OnInit {
   // 🔥 GUARDAR CAMBIOS EN FIRESTORE
   async guardarEdicion() {
     if (!this.citaEditando) return;
+
+    if (
+      !this.citaEditando.fecha ||
+      !this.citaEditando.hora ||
+      !this.citaEditando.duenio ||
+      !this.citaEditando.nombre ||
+      !this.citaEditando.telefono
+    ) {
+      alert('Completa dueño, mascota, teléfono, fecha y hora.');
+      return;
+    }
+
+    await this.cargarHorasOcupadas(
+      this.citaEditando.fecha,
+      this.citaEditando.id
+    );
+
+    if (
+      this.horaBloqueada(
+        this.citaEditando.hora,
+        this.citaEditando.fecha,
+        this.citaEditando.id
+      )
+    ) {
+      alert('Ese horario ya no está disponible. Selecciona otra hora.');
+      return;
+    }
 
     try {
 

@@ -63,3 +63,12 @@ h2 {
 .btn-success:hover {
   background-color: #16a34a;
 }
+
+
+/* Horarios que ya tienen una reserva */
+select option.hora-ocupada,
+select option:disabled {
+  color: #9ca3af;
+  background-color: #e5e7eb;
+}
+
