@@ -62,9 +62,18 @@ mi-proyecto01-integrado-huellitas/
 
 🌐 Deployment (Producción)
 
-El proyecto está desplegado en Render y se puede acceder desde:
+El proyecto está desplegado en firebase y se puede acceder desde:
 
-👉 https://veterinaria-interfaces-3.web.app
+👉 https://veterinariainterfaces3.web.app/
+
+1. Compilar el proyecto Angular
+npx ng build
+
+Esto genera los archivos actualizados dentro de dist/mi-proyecto01/browser/.
+
+2. Publicar los cambios en Firebase Hosting
+
+firebase deploy --only hosting
 
 ### 1️⃣ Requisitos previos
 Antes de ejecutar la aplicación, asegúrate de tener instalado lo siguiente:
