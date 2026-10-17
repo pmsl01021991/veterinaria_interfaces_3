@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../services/toast.service';
 import { Firestore, collection, collectionData, addDoc, deleteDoc, updateDoc, doc, getDocs, query, where} from '@angular/fire/firestore';
 
 @Component({
@@ -56,7 +57,7 @@ export class Citas implements OnInit {
     await this.cargarCitas();
   }
 
-  constructor(private cdr: ChangeDetectorRef) {} // ← Inyectar
+  constructor(private cdr: ChangeDetectorRef, private toast: ToastService) {} // ← Inyectar
 
   horariosDisponibles: string[] = [
   '09:00',
@@ -126,22 +127,28 @@ horaBloqueada(
 }
 
   // 🔥 CARGAR MASCOTAS DESDE FIRESTORE
-  async cargarCitas() {
-    this.cargando = true;
-    try {
+  
+    async cargarCitas() {
+      this.cargando = true;
+
       const ref = collection(this.firestore, 'mascotas');
-      collectionData(ref, { idField: 'id' }).subscribe((data) => {
-        this.citas = data;
-        this.citasFiltradas = data;
-        this.cargando = false;
-        this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
+
+      collectionData(ref, { idField: 'id' }).subscribe({
+        next: (data) => {
+          this.citas = data;
+          this.citasFiltradas = data;
+          this.cargando = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error al cargar las citas:', err);
+          this.toast.error('No se pudieron cargar las citas.');
+          this.cargando = false;
+          this.cdr.detectChanges();
+        }
       });
-    } catch (err) {
-      console.error(err);
-      this.cargando = false;
-      this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     }
-  }
+
 
   filtrarCitas() {
     const term = this.searchTerm.trim().toLowerCase();
@@ -185,7 +192,7 @@ horaBloqueada(
       !this.nuevaCita.fecha ||
       !this.nuevaCita.hora
     ) {
-      alert('Completa dueño, mascota, teléfono, fecha y hora.');
+      this.toast.warning('Completa dueño, mascota, teléfono, fecha y hora.');
       return;
     }
 
@@ -229,30 +236,36 @@ horaBloqueada(
         this.nuevaCita.fecha
       )
     ) {
-      alert('Ese horario ya pasó o no está disponible. Selecciona otra hora.');
+      this.toast.warning('Ese horario ya pasó o no está disponible. Selecciona otra hora.');
       return;
     }
 
     try {
       await addDoc(collection(this.firestore, 'mascotas'), nuevoRegistro);
       this.mostrarFormulario = false;
-      alert('✅ Cita agregada correctamente');
+      this.toast.success('✅ Cita agregada correctamente');
     } catch (err) {
       console.error(err);
-      alert('No se pudo agregar la cita');
+      this.toast.error('No se pudo agregar la cita');
     }
   }
 
   // 🔥 ELIMINAR CITA DE FIRESTORE
   async eliminarCita(id: string) {
-    if (!confirm('¿Seguro que deseas eliminar esta cita?')) return;
+    const confirmado = await this.toast.confirmar(
+      '¿Eliminar cita?',
+      '¿Seguro que deseas eliminar esta cita?',
+      'Sí, eliminar'
+    );
+
+    if (!confirmado) return;
 
     try {
       await deleteDoc(doc(this.firestore, 'mascotas', id));
-      alert('🗑 Eliminada correctamente');
+      this.toast.success('🗑 Cita eliminada correctamente');
     } catch (err) {
       console.error(err);
-      alert('No se pudo eliminar');
+      this.toast.error('No se pudo eliminar la cita');
     }
   }
 
@@ -284,7 +297,7 @@ horaBloqueada(
       !this.citaEditando.nombre ||
       !this.citaEditando.telefono
     ) {
-      alert('Completa dueño, mascota, teléfono, fecha y hora.');
+      this.toast.warning('Completa dueño, mascota, teléfono, fecha y hora.');
       return;
     }
 
@@ -300,7 +313,7 @@ horaBloqueada(
         this.citaEditando.id
       )
     ) {
-      alert('Ese horario ya no está disponible. Selecciona otra hora.');
+      this.toast.warning('Ese horario ya no está disponible. Selecciona otra hora.');
       return;
     }
 
@@ -324,12 +337,12 @@ horaBloqueada(
         datosActualizados
       );
 
-      alert('✅ Cita actualizada');
+      this.toast.success('✅ Cita actualizada');
       this.citaEditando = null;
       this.cdr.detectChanges(); // Forzar actualización
     } catch (err) {
       console.error(err);
-      alert('No se pudo actualizar');
+      this.toast.error('No se pudo actualizar la cita');
     }
   }
 

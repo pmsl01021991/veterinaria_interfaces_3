@@ -1,30 +1,22 @@
-import { CanActivateFn, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+import { CanActivateFn } from '@angular/router';
+import { inject } from '@angular/core';
+import { ToastService } from '../services/toast.service';
 
-
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = async () => {
+  const toast = inject(ToastService);
 
   const usuario = JSON.parse(
     localStorage.getItem('user') || 'null'
   );
 
   if (!usuario) {
+    const confirmado = await toast.solicitarInicioSesion();
 
-    Swal.fire({
-      icon: 'warning',
-      title: 'Inicia sesión',
-      text: 'Primero debes iniciar sesión para acceder a la sección de adopción.',
-      confirmButtonText: 'Iniciar sesión',
-      confirmButtonColor: '#377fb2'
-    }).then((resultado) => {
-
-      if (resultado.isConfirmed) {
-        window.dispatchEvent(
-          new CustomEvent('abrir-auth')
-        );
-      }
-
-    });
+    if (confirmado) {
+      window.dispatchEvent(
+        new CustomEvent('abrir-auth')
+      );
+    }
 
     return false;
   }

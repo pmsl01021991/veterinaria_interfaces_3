@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
-import { Subscription } from 'rxjs';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-historial',
@@ -21,25 +21,33 @@ export class Historial implements OnInit, OnDestroy {
   private dejarDeEscuchar?: () => void;
 
   constructor(private router: Router, private firebase: FirebaseService,
-    private cdr: ChangeDetectorRef  // ← Inyectar
+    private cdr: ChangeDetectorRef, private toast: ToastService  // ← Inyectar
   ) {}
 
   ngOnInit() {
     this.cargando = true;
 
-    this.dejarDeEscuchar = this.firebase.escucharMascotas((data) => {
-      this.citas = data.map((c: any) => ({
-        ...c,
-        estado: c.estado || 'Pendiente'
-      }));
+    this.dejarDeEscuchar = this.firebase.escucharMascotas(
+      (data) => {
+        this.citas = data.map((c: any) => ({
+          ...c,
+          estado: c.estado || 'Pendiente'
+        }));
 
-      this.citas.sort((a, b) =>
-        (a.fecha || '').localeCompare(b.fecha || '')
-      );
+        this.citas.sort((a, b) =>
+          (a.fecha || '').localeCompare(b.fecha || '')
+        );
 
-      this.cargando = false;
-      this.cdr.detectChanges();
-    });
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      (error) => {
+        console.error('Error al cargar el historial:', error);
+        this.cargando = false;
+        this.cdr.detectChanges();
+        this.toast.error('No se pudo cargar el historial de citas.');
+      }
+    );
   }
 
   ngOnDestroy() {
@@ -60,7 +68,7 @@ export class Historial implements OnInit, OnDestroy {
       this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     } catch (error) {
       console.error('❌ Error al cargar citas:', error);
-      alert('Error al cargar las citas');
+      this.toast.error('Error al cargar las citas');
     } finally {
       this.cargando = false;
       this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
@@ -110,34 +118,39 @@ export class Historial implements OnInit, OnDestroy {
       await this.firebase.updateMascotaEstado(cita.id, nuevoEstado);
 
       cita.estado = nuevoEstado;
-      alert(`✅ Estado actualizado a ${nuevoEstado}`);
+      this.toast.success(`✅ Estado actualizado a ${nuevoEstado}`);
     } catch (error) {
       console.error('❌ Error al actualizar estado:', error);
-      alert('Error al actualizar estado');
+      this.toast.error('Error al actualizar estado');
     }
   }
 
   
   // 🗑️ Eliminar mascota (cita) de Firestore
-  async eliminar(id?: string) {
-    if (!id) return;
+  
+    async eliminar(id?: string) {
+      if (!id) return;
 
-    const confirmar = confirm('¿Seguro que deseas eliminar esta cita?');
-    if (!confirmar) return;
+      const confirmado = await this.toast.confirmar(
+        '¿Eliminar cita?',
+        '¿Seguro que deseas eliminar esta cita?',
+        'Sí, eliminar'
+      );
 
-    try {
-      await this.firebase.deleteMascota(id);
+      if (!confirmado) return;
 
-      // Actualizar la tabla inmediatamente
-      this.citas = this.citas.filter(c => c.id !== id);
-      this.cdr.detectChanges();
+      try {
+        await this.firebase.deleteMascota(id);
 
-      alert('✅ Cita eliminada correctamente');
-    } catch (error) {
-      console.error('❌ Error al eliminar cita:', error);
-      alert('Error al eliminar la cita');
+        this.citas = this.citas.filter(c => c.id !== id);
+        this.cdr.detectChanges();
+
+        this.toast.success('Cita eliminada correctamente.');
+      } catch (error) {
+        console.error('❌ Error al eliminar cita:', error);
+        this.toast.error('Error al eliminar la cita.');
+      }
     }
-  }
 
 
   // 👁️ Ver expediente

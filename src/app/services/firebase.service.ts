@@ -21,30 +21,34 @@ export class FirebaseService {
 
   
   // Escuchar un expediente específico en tiempo real
-  escucharMascota(
-    id: string,
-    callback: (mascota: any | null) => void
-  ) {
-    const ref = doc(this.db, 'mascotas', id);
+  
+    escucharMascota(
+      id: string,
+      callback: (mascota: any | null) => void,
+      callbackError?: (error: Error) => void
+    ) {
+      const ref = doc(this.db, 'mascotas', id);
 
-    return onSnapshot(
-      ref,
-      (snap) => {
-        if (!snap.exists()) {
-          callback(null);
-          return;
+      return onSnapshot(
+        ref,
+        (snap) => {
+          if (!snap.exists()) {
+            callback(null);
+            return;
+          }
+
+          callback({
+            id: snap.id,
+            ...snap.data()
+          });
+        },
+        (error) => {
+          console.error('Error al escuchar el expediente:', error);
+          callbackError?.(error);
         }
+      );
+    }
 
-        callback({
-          id: snap.id,
-          ...snap.data()
-        });
-      },
-      (error) => {
-        console.error('Error al escuchar el expediente:', error);
-      }
-    );
-  }
 
 
   // ⭐ Obtener todas las mascotas (para historial)
@@ -60,24 +64,28 @@ export class FirebaseService {
 
   
   // 🔴 Escuchar cambios en tiempo real de las mascotas y citas
-  escucharMascotas(callback: (mascotas: any[]) => void) {
-    const ref = collection(this.db, 'mascotas');
+  escucharMascotas(
+      callback: (mascotas: any[]) => void,
+      callbackError?: (error: Error) => void
+    ) {
+      const ref = collection(this.db, 'mascotas');
 
-    return onSnapshot(
-      ref,
-      (snaps) => {
-        const mascotas = snaps.docs.map(d => ({
-          id: d.id,
-          ...d.data()
-        }));
+      return onSnapshot(
+        ref,
+        (snaps) => {
+          const mascotas = snaps.docs.map(d => ({
+            id: d.id,
+            ...d.data()
+          }));
 
-        callback(mascotas);
-      },
-      (error) => {
-        console.error('Error al escuchar cambios en mascotas:', error);
-      }
-    );
-  }
+          callback(mascotas);
+        },
+        (error) => {
+          console.error('Error al escuchar cambios en mascotas:', error);
+          callbackError?.(error);
+        }
+      );
+    }
 
 
   // ⭐ Crear una nueva mascota / cita

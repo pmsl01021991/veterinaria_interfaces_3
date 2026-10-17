@@ -2,8 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import Swal from 'sweetalert2';
-
+import { ToastService } from '../../services/toast.service';
 import { FirebaseService } from '../../services/firebase.service';
 import { comprimirImagen } from '../../utils/imagen-utils';
 
@@ -36,7 +35,8 @@ export class DarEnAdopcion {
 
   constructor(
     private router: Router,
-    private firebase: FirebaseService
+    private firebase: FirebaseService,
+    private toast: ToastService
   ) {}
 
   seleccionarImagen(event: Event) {
@@ -60,6 +60,8 @@ export class DarEnAdopcion {
     lector.readAsDataURL(archivo);
   }
 
+
+  
   async publicarAdopcion() {
 
     const camposFaltantes: string[] = [];
@@ -109,32 +111,16 @@ export class DarEnAdopcion {
     }
 
     if (camposFaltantes.length > 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Completa todos los campos',
-        html: `
-          <p>Antes de publicar debes completar:</p>
-          <ul style="text-align: left;">
-            ${camposFaltantes.map(campo => `<li>${campo}</li>`).join('')}
-          </ul>
-        `,
-        confirmButtonText: 'Entendido',
-        confirmButtonColor: '#377fb2'
-      });
-
+      this.toast.warning(
+        'Completa los campos: ' + camposFaltantes.join(', ')
+      );
       return;
     }
 
     if (!this.mascota.aceptaResponsabilidad) {
-
-      Swal.fire({
-        icon: 'warning',
-        title: 'Confirmación requerida',
-        text: 'Debes confirmar que entiendes tu responsabilidad antes de publicar.',
-        confirmButtonText: 'Entendido',
-        confirmButtonColor: '#377fb2'
-      });
-
+      this.toast.warning(
+        'Debes confirmar tu responsabilidad antes de publicar.'
+      );
       return;
     }
 
@@ -187,10 +173,9 @@ export class DarEnAdopcion {
       // Guardar en Firestore
       await this.firebase.addAdopcion(nuevaAdopcion);
 
-      await Swal.fire({
-        icon: 'success',
-        title: '¡Solicitud recibida!',
-        html: `
+      await this.toast.exitoConDetalle(
+        '¡Solicitud recibida!',
+        `
           <p>
             La información de tu mascota
             ha sido registrada correctamente.
@@ -205,10 +190,8 @@ export class DarEnAdopcion {
           <strong>
             🕐 Estado actual: Pendiente de revisión
           </strong>
-        `,
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#22c55e'
-      });
+        `
+      );
 
       // Limpiar formulario
       this.mascota = {
@@ -235,12 +218,9 @@ export class DarEnAdopcion {
         error
       );
 
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo registrar la mascota. Intenta nuevamente.',
-        confirmButtonColor: '#377fb2'
-      });
+      this.toast.error(
+        'No se pudo registrar la mascota. Intenta nuevamente.'
+      );
     }
   }
 

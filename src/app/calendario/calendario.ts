@@ -5,7 +5,8 @@ import { FullCalendarModule } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { ReservasService, ServicioVeterinario } from '../services/reservas.service';
-import { Firestore, collection, addDoc} from '@angular/fire/firestore';
+import { Firestore, collection, doc, writeBatch} from '@angular/fire/firestore';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-calendario',
@@ -76,7 +77,8 @@ obtenerFechaLocal(): string {
   constructor(
     private reservasSrv: ReservasService,
     private zone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService
   ) {}
 
   obtenerIcono(tipo: string): string {
@@ -104,7 +106,7 @@ obtenerFechaLocal(): string {
       f.setHours(0, 0, 0, 0);
 
       if (f < hoy) {
-        alert('No puedes agendar en fechas pasadas.');
+        this.toast.warning('No puedes agendar en fechas pasadas.');
         return;
       }
 
@@ -133,24 +135,30 @@ obtenerFechaLocal(): string {
   async continuarConServicio() {
     if (!this.servicioSeleccionado || !this.fechaISO) return;
 
-    this.horas = [
-      '09:00',
-      '10:00',
-      '11:00',
-      '12:00',
-      '14:00',
-      '15:00',
-      '16:00'
-    ];
+    try {
+      this.horas = [
+        '09:00',
+        '10:00',
+        '11:00',
+        '12:00',
+        '14:00',
+        '15:00',
+        '16:00'
+      ];
 
-this.horasOcupadas = await this.reservasSrv.getHorasOcupadas(
-  this.fechaISO!
-);
+      this.horasOcupadas = await this.reservasSrv.getHorasOcupadas(
+        this.fechaISO
+      );
 
-    this.nombreServicioSeleccionado = this.servicioSeleccionado.nombre;
-    this.horaSeleccionada = null;
-    this.paso = 2;
-    this.cdr.detectChanges();
+      this.nombreServicioSeleccionado = this.servicioSeleccionado.nombre;
+      this.horaSeleccionada = null;
+      this.paso = 2;
+      this.cdr.detectChanges();
+
+    } catch (error) {
+      console.error('Error al consultar las horas:', error);
+      this.toast.error('No se pudieron consultar los horarios disponibles.');
+    }
   }
 
   continuarConHora() {
@@ -212,7 +220,7 @@ this.horasOcupadas = await this.reservasSrv.getHorasOcupadas(
       !this.nombreDueno ||
       !this.telefonoDuenio
     ) {
-      alert('Por favor completa todos los datos antes de confirmar.');
+      this.toast.warning('Por favor completa todos los datos antes de confirmar.');
       return;
     }
 
@@ -266,7 +274,7 @@ this.horasOcupadas = await this.reservasSrv.getHorasOcupadas(
       horasOcupadasActuales.includes(this.horaSeleccionada);
 
     if (horaYaPaso || horaYaReservada) {
-      alert(
+      this.toast.warning(
         horaYaPaso
           ? 'No puedes reservar una hora que ya pasó.'
           : 'Esta hora ya está reservada. Selecciona otra.'
@@ -280,13 +288,20 @@ this.horasOcupadas = await this.reservasSrv.getHorasOcupadas(
 
 
     try {
-      // 🔥 Guardar mascota en Firestore
-      await addDoc(collection(this.firestore, 'mascotas'), nuevaMascota);
+      const batch = writeBatch(this.firestore);
 
-      // 🔥 Guardar cita en Firestore
-      await addDoc(collection(this.firestore, 'citas'), nuevaCita);
+      // Crear referencias con IDs únicos
+      const mascotaRef = doc(collection(this.firestore, 'mascotas'));
+      const citaRef = doc(collection(this.firestore, 'citas'));
 
-      alert('✅ Tu cita se ha registrado correctamente.');
+      // Preparar ambos registros
+      batch.set(mascotaRef, nuevaMascota);
+      batch.set(citaRef, nuevaCita);
+
+      // Guardar ambos documentos como una sola operación
+      await batch.commit();
+
+      this.toast.success('Tu cita se ha registrado correctamente.');
 
       this.zone.run(() => {
         this.wizardAbierto = false;
@@ -295,7 +310,10 @@ this.horasOcupadas = await this.reservasSrv.getHorasOcupadas(
 
     } catch (err) {
       console.error('❌ Error al guardar en Firestore:', err);
-      alert('No se pudo guardar la reserva.');
+
+      this.toast.error(
+        'No se pudo guardar la reserva. Inténtalo nuevamente.'
+      );
     }
   }
 

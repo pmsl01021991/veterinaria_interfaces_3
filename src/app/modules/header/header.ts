@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Authentication } from '../authentication/authentication';
 import { filter } from 'rxjs/operators';
+import { ToastService } from '../../services/toast.service';
 
 type UserStored = {
   name?: string;
@@ -27,7 +28,7 @@ export class Header implements OnInit {
   user: { name: string; rol: 'admin' | 'cliente' } | null = null;
   menuAbierto = false;
 
-  constructor(private router: Router, private el: ElementRef<HTMLElement>) {}
+  constructor(private router: Router, private el: ElementRef<HTMLElement>, private toast: ToastService) {}
 
   ngOnInit(): void {
     this.cargarUsuario();
@@ -47,6 +48,10 @@ export class Header implements OnInit {
 
     // Detecta cambios en localStorage (login/logout en otra pestaña)
     window.addEventListener('storage', () => this.cargarUsuario());
+
+    window.addEventListener('usuario-actualizado', () => {
+      this.cargarUsuario();
+    });
   }
 
   // Toggle del hamburguesa
@@ -89,7 +94,7 @@ export class Header implements OnInit {
       const u: UserStored = JSON.parse(raw);
       const name = u.name ?? u.username ?? (u.email ? u.email.split('@')[0] : '');
       const rol = (u.rol as 'admin' | 'cliente') ?? (u.username === 'admin@gmail.com' ? 'admin' : 'cliente');
-      if (name) this.user = { name, rol };
+      this.user = name ? { name, rol } : null;
     } catch {
       this.user = null;
     }
@@ -97,6 +102,7 @@ export class Header implements OnInit {
 
   logout(): void {
     localStorage.removeItem('user');
+    window.dispatchEvent(new Event('usuario-actualizado'));
     this.user = null;
     this.router.navigate(['/']).then(() => window.location.reload());
   }
@@ -114,7 +120,7 @@ export class Header implements OnInit {
     if (event) event.preventDefault(); // importante para evitar salto por href="#"
     const usuarioRegistrado = localStorage.getItem('user');
     if (!usuarioRegistrado) {
-      alert('Debes iniciar sesión o registrarte antes de separar una cita.');
+      this.toast.warning('Debes iniciar sesión o registrarte antes de separar una cita.');
       this.mostrarAuth = true;
       return;
     }
@@ -127,12 +133,12 @@ export class Header implements OnInit {
     if (form.valid) {
       const { email, password, confirmPassword } = form.value;
       if (password !== confirmPassword) {
-        alert('Las contraseñas no coinciden.');
+        this.toast.error('Las contraseñas no coinciden.');
         return;
       }
-      alert('✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.');
+      this.toast.success('✅ Cuenta creada correctamente. Ahora puedes iniciar sesión.');
     } else {
-      alert('Por favor completa todos los campos.');
+      this.toast.warning('Por favor completa todos los campos.');
     }
   }
 

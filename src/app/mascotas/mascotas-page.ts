@@ -1,7 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FirebaseService } from '../services/firebase.service'; // 🟢 IMPORTANTE
+import { FirebaseService } from '../services/firebase.service'; 
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-mascotas',
@@ -16,7 +17,7 @@ export class Mascotas implements OnInit {
   cargando: boolean = true;
 
   constructor(private firebase: FirebaseService,
-    private cdr: ChangeDetectorRef  // ← Inyectar
+    private cdr: ChangeDetectorRef, private toast: ToastService  // ← Inyectar
   ) {}
 
   obtenerIcono(tipo: string): string {
@@ -36,6 +37,7 @@ export class Mascotas implements OnInit {
       this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
     } catch (error) {
       console.error('⚠️ No se pudo cargar desde Firebase:', error);
+      this.toast.error('No se pudieron cargar las mascotas.');
     } finally {
       this.cargando = false;
       this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN

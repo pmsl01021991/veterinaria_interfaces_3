@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FirebaseService } from '../../services/firebase.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-adopciones-disponibles',
@@ -19,7 +20,8 @@ export class AdopcionesDisponibles implements OnInit {
   constructor(
     private firebase: FirebaseService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -57,6 +59,8 @@ export class AdopcionesDisponibles implements OnInit {
         '❌ Error cargando mascotas disponibles:',
         error
       );
+
+      this.toast.error('No se pudieron cargar las adopciones.');
 
     } finally {
 

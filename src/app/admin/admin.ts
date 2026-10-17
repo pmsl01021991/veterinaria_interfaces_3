@@ -1,13 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import {
-  Firestore,
-  collection,
-  collectionData,
-  deleteDoc,
-  doc
-} from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, deleteDoc, doc} from '@angular/fire/firestore';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-admin',
@@ -21,7 +15,7 @@ export class Admin implements OnInit {
   private firestore = inject(Firestore);
   citas: any[] = [];
 
-  constructor(private cdr: ChangeDetectorRef) {} // ← INYECTAR
+  constructor(private cdr: ChangeDetectorRef, private toast: ToastService) {} // ← INYECTAR
 
   ngOnInit() {
     this.cargarCitas();
@@ -38,7 +32,7 @@ export class Admin implements OnInit {
       },
       error: (err) => {
         console.error('❌ Error al cargar citas:', err);
-        alert('No se pudieron cargar las citas.');
+        this.toast.error('No se pudieron cargar las citas.');
         this.cdr.detectChanges(); // ← FORZAR ACTUALIZACIÓN
       }
     });
@@ -47,16 +41,25 @@ export class Admin implements OnInit {
   // 🗑️ Eliminar cita en Firestore
   async eliminarCita(index: number) {
     const cita = this.citas[index];
-    if (!cita || !confirm('¿Seguro que deseas eliminar esta cita?')) return;
+
+    if (!cita) return;
+
+    const confirmado = await this.toast.confirmar(
+      '¿Eliminar cita?',
+      '¿Seguro que deseas eliminar esta cita?',
+      'Sí, eliminar'
+    );
+
+    if (!confirmado) return;
 
     try {
       const citaDoc = doc(this.firestore, `citas/${cita.id}`);
       await deleteDoc(citaDoc);
 
-      alert('✅ Cita eliminada correctamente.');
+      this.toast.success('Cita eliminada correctamente.');
     } catch (err) {
       console.error('❌ Error al eliminar cita:', err);
-      alert('No se pudo eliminar la cita.');
+      this.toast.error('No se pudo eliminar la cita.');
     }
   }
 }

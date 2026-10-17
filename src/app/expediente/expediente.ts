@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FirebaseService } from '../services/firebase.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-expediente',
@@ -19,7 +20,8 @@ export class Expediente implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private firebase: FirebaseService,
-    private cdr: ChangeDetectorRef  // ← INYECTAR
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService  // ← INYECTAR
   ) {}
 
   
@@ -28,6 +30,7 @@ ngOnInit() {
 
   if (!id) {
     this.cargando = false;
+    this.toast.error('No se proporcionó el ID del expediente.');
     return;
   }
 
@@ -39,8 +42,14 @@ ngOnInit() {
       this.cdr.detectChanges();
 
       if (!data) {
-        alert('Expediente no encontrado en Firestore');
+        this.toast.error('Expediente no encontrado en Firestore');
       }
+    },
+    (error) => {
+      console.error('Error al cargar el expediente:', error);
+      this.cargando = false;
+      this.cdr.detectChanges();
+      this.toast.error('No se pudo cargar el expediente.');
     }
   );
 }

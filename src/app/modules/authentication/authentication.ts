@@ -1,17 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import Swal from 'sweetalert2';
-
-import {
-  Firestore,
-  collection,
-  collectionData,
-  addDoc,
-  query,
-  where,
-} from '@angular/fire/firestore';
+import { ToastService } from '../../services/toast.service';
+import { Firestore, collection, collectionData, addDoc, query, where,} from '@angular/fire/firestore';
 import { firstValueFrom } from 'rxjs';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-authentication',
@@ -32,7 +25,9 @@ export class Authentication {
   mostrarAuth = true;
 
   private firestore = inject(Firestore);
+  private toast = inject(ToastService);
 
+  
   validarEmail(email: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
@@ -40,6 +35,7 @@ export class Authentication {
   validarPassword(pass: string): boolean {
     return /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{6,}$/.test(pass);
   }
+
 
   handleShowRegister() {
     this.showRegister = !this.showRegister;
@@ -50,15 +46,20 @@ export class Authentication {
     this.mostrarAuth = false;
   }
 
-  mostrarModal(titulo: string, mensaje: string, tipo: any) {
-    Swal.fire({
-      title: titulo,
-      html: `<div style="font-size: 16px;">${mensaje}</div>`,
-      icon: tipo,
-      confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#007BFF'
-    });
-  }
+  mostrarModal(
+  titulo: string,
+  mensaje: string,
+  tipo: 'success' | 'error' | 'warning' | 'info'
+) {
+  Swal.fire({
+    title: titulo,
+    html: `<div style="font-size: 16px;">${mensaje}</div>`,
+    icon: tipo,
+    showConfirmButton: false,
+    timer: 1300,
+    timerProgressBar: true
+  });
+}
 
   // -----------------------------------------------------
   // 🔥 LOGIN CON FIRESTORE
@@ -84,9 +85,10 @@ export class Authentication {
         rol: 'admin'
       };
       localStorage.setItem('user', JSON.stringify(adminUser));
+      window.dispatchEvent(new Event('usuario-actualizado'));
       this.mostrarModal('Bienvenido Administrador 👑', 'Inicio de sesión exitoso', 'success');
       this.cerrarAuth();
-      setTimeout(() => window.dispatchEvent(new Event('storage')), 800);
+      window.dispatchEvent(new Event('storage'));
       return;
     }
 
@@ -112,6 +114,7 @@ export class Authentication {
       const usuarioLogueado = { ...user, name: nombreLimpio };
 
       localStorage.setItem('user', JSON.stringify(usuarioLogueado));
+      window.dispatchEvent(new Event('usuario-actualizado'));
 
       this.mostrarModal(
         'Inicio de sesión exitoso ✅',
@@ -120,7 +123,7 @@ export class Authentication {
       );
 
       this.cerrarAuth();
-      setTimeout(() => window.location.reload(), 1500);
+      window.dispatchEvent(new Event('storage'));
 
     } catch (error) {
       console.error('❌ Error en login:', error);

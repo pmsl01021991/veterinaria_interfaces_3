@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FirebaseService } from '../services/firebase.service';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-adopciones-admin',
@@ -22,7 +23,8 @@ export class AdopcionesAdmin implements OnInit, OnDestroy {
   constructor(
     private firebase: FirebaseService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService
   ) {}
 
   
@@ -99,9 +101,9 @@ export class AdopcionesAdmin implements OnInit, OnDestroy {
         this.cdr.detectChanges();
 
         // Esperar a que Angular pinte nuevamente la tarjeta
-        setTimeout(() => {
-        alert('✅ Los datos de la mascota fueron actualizados.');
-        }, 0);
+        this.toast.success(
+          'Los datos de la mascota fueron actualizados.'
+        );
 
     } catch (error) {
 
@@ -110,9 +112,7 @@ export class AdopcionesAdmin implements OnInit, OnDestroy {
         error
         );
 
-        alert(
-        'No se pudieron guardar los cambios.'
-        );
+        this.toast.error('No se pudieron guardar los cambios.');
     }
     }
 
@@ -137,7 +137,7 @@ export class AdopcionesAdmin implements OnInit, OnDestroy {
 
             this.cdr.detectChanges();
 
-            alert(
+            this.toast.success(
             `✅ ${mascota.nombre} fue aceptada y ya está disponible para adopción.`
             );
 
@@ -148,49 +148,39 @@ export class AdopcionesAdmin implements OnInit, OnDestroy {
             error
             );
 
-            alert(
-            'No se pudo aceptar la mascota.'
-            );
+            this.toast.error('No se pudo aceptar la mascota.');
         }
         }
 
     async rechazarAdopcion(mascota: any) {
+      const confirmado = await this.toast.confirmar(
+        '¿Rechazar solicitud?',
+        `¿Deseas rechazar la solicitud de ${mascota.nombre}?`,
+        'Sí, rechazar'
+      );
 
-  if (
-    !confirm(
-      `¿Deseas rechazar la solicitud de ${mascota.nombre}?`
-    )
-  ) {
-    return;
-  }
+      if (!confirmado) return;
 
-  try {
+      try {
+        await this.firebase.updateAdopcionEstado(
+          mascota.id,
+          'Rechazada'
+        );
 
-    await this.firebase.updateAdopcionEstado(
-      mascota.id,
-      'Rechazada'
-    );
+        mascota.estado = 'Rechazada';
 
-    mascota.estado = 'Rechazada';
+        this.cdr.detectChanges();
 
-    this.cdr.detectChanges();
+        this.toast.success(
+          `La solicitud de ${mascota.nombre} fue rechazada.`
+        );
 
-    alert(
-      `La solicitud de ${mascota.nombre} fue rechazada.`
-    );
+      } catch (error) {
+        console.error('❌ Error rechazando adopción:', error);
 
-  } catch (error) {
-
-    console.error(
-      '❌ Error rechazando adopción:',
-      error
-    );
-
-    alert(
-      'No se pudo rechazar la mascota.'
-    );
-  }
-}
+        this.toast.error('No se pudo rechazar la mascota.');
+      }
+    }
 
   volver() {
     this.router.navigate(['/admin']);
